@@ -1,8 +1,15 @@
-#!/bin/bash 
+#!/bin/bash
+set -euo pipefail
 
 # This script can take over 1 hour to complete
 # This script requires contributor and user access administrator permissions to run
 source ./settings.sh
+
+# Check required secrets are set
+if [ -z "${client_secret:-}" ]; then
+  echo "ERROR: client_secret is not set. Please set it in settings.sh or export it before running this script."
+  exit 1
+fi
 
 # To run in Azure Cloud CLI, comment this section out
 # az login --output none
@@ -24,6 +31,16 @@ key_vault_name=$base"keyvault"
 # Retrieve account info
 tenant_id=$(az account show --query "homeTenantId" -o tsv)
 subscription_id=$(az account show --query "id" -o tsv)
+
+echo "tenant_id is $tenant_id"
+echo "subscription_id is $subscription_id"
+
+# Ensure subscription_id is set and set the Azure CLI context
+if [ -z "${subscription_id:-}" ]; then
+  echo "ERROR: subscription_id is not set. Please check your settings.sh or Azure CLI context."
+  exit 1
+fi
+az account set --subscription "$subscription_id"
 
 #################################################################################
 
@@ -50,50 +67,23 @@ else
     --output none
 fi
 
-# Assign Key Vault Secrets Officer role to the current user
-current_user_object_id=$(az ad signed-in-user show --query objectId -o tsv)
-role_assignment_exists=$(az role assignment list --assignee $current_user_object_id --role "Key Vault Secrets Officer" --scope "/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$key_vault_name" --query "[0]" -o tsv)
+# Assign Key Vault Secrets Officer role to the signed-in user (az login account)
+user_upn=$(az account show --query user.name -o tsv)
+
+role_assignment_exists=$(az role assignment list --assignee $user_upn --all --query "[?roleDefinitionName=='Key Vault Secrets Officer' && scope=='/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$key_vault_name'] | [0]" -o tsv)
 if [ -z "$role_assignment_exists" ]; then
-  echo "Assigning Key Vault Secrets Officer role to current user."
+  echo "Assigning Key Vault Secrets Officer role to signed-in user ($user_upn)."
   az role assignment create \
-    --assignee $current_user_object_id \
+    --assignee $user_upn \
     --role "Key Vault Secrets Officer" \
-    --scope "/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$key_vault_name" \
+    --scope "subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$key_vault_name" \
     --output none
 else
-  echo "Key Vault Secrets Officer role already assigned to current user. Skipping."
+  echo "Key Vault Secrets Officer role already assigned to signed-in user. Skipping."
 fi
 
-# Print the current user and caller info for RBAC troubleshooting
-echo "Current user objectId (for role assignment): $current_user_object_id"
-caller_object_id=$(az account show --query user.name -o tsv 2>/dev/null)
-echo "Caller (az account show --query user.name): $caller_object_id"
-
-# Wait for role assignment propagation
-max_wait=300  # max 5 minutes
-waited=0
-interval=15
-
-echo "Waiting for RBAC propagation (up to $max_wait seconds)..."
-while true; do
-  # Try a dry-run secret set to check permission
-  az keyvault secret set --vault-name $key_vault_name --name __rbac_check__ --value test --output none 2>/dev/null
-  if [ $? -eq 0 ]; then
-    az keyvault secret delete --vault-name $key_vault_name --name __rbac_check__ --output none 2>/dev/null
-    echo "RBAC propagation complete."
-    break
-  fi
-  if [ $waited -ge $max_wait ]; then
-    echo "RBAC propagation timed out after $max_wait seconds. Exiting."
-    exit 1
-  fi
-  echo "Waiting $interval seconds for RBAC propagation... ($waited/$max_wait)"
-  sleep $interval
-  waited=$((waited+interval))
-done
-
 # Now set the secret only if it does not exist or value is different
-existing_secret_value=$(az keyvault secret show --vault-name $key_vault_name --name client-secret --query value -o tsv 2>/dev/null)
+existing_secret_value=$(az keyvault secret show --vault-name $key_vault_name --name client-secret --query value -o tsv 2>/dev/null || true)
 if [ "$existing_secret_value" != "$client_secret" ]; then
   echo "Setting client-secret in Key Vault."
   az keyvault secret set --vault-name $key_vault_name --name client-secret --value $client_secret --output none >> log_connector_services_deploy.txt
@@ -103,7 +93,7 @@ fi
 
 echo "Retrieving client secret uri"
 # Get secret URI to fill in pipeline templates later
-client_secret_uri=$(az keyvault secret show --name client-secret --vault-name $key_vault_name --query 'id' -o tsv)
+client_secret_uri=$(az keyvault secret show --name client-secret --vault-name $key_vault_name --query 'value' -o tsv)
 
 ##################################################################################
 
