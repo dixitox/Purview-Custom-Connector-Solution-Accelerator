@@ -21,6 +21,9 @@
                 "false"
             ],
             "defaultValue": "true"
+        },
+        "sqlAdministratorLoginPassword": {
+            "type": "securestring"
         }
     },
 
@@ -115,13 +118,14 @@
                 "virtualNetworkProfile": {
                     "computeSubnetId": ""
                 },
-                "sqlAdministratorLogin": "sqladminuser"
+                "sqlAdministratorLogin": "sqladminuser",
+                "sqlAdministratorLoginPassword": "[parameters('sqlAdministratorLoginPassword')]"
             },
             "resources": [
                 {
                     "condition": "[equals(parameters('AllowAll'),'true')]",
-                    "type": "firewallrules",
-                    "apiVersion": "2019-06-01-preview",
+                    "type": "firewallRules",
+                    "apiVersion": "2020-12-01",
                     "name": "allowAll",
                     "location": "[variables('location')]",
                     "dependsOn": [ "[variables('synapseWorkspaceName')]" ],
@@ -129,7 +133,7 @@
                       "startIpAddress": "0.0.0.0",
                       "endIpAddress": "255.255.255.255"
                     }
-                  }
+                }
             ]
         },
         {
@@ -141,7 +145,7 @@
                 "[resourceId('Microsoft.Synapse/workspaces', variables('synapseWorkspaceName'))]"
             ],
             "properties": {
-                "sparkVersion": "2.4",
+                "sparkVersion": "3.3",
                 "nodeCount": 3,
                 "nodeSize": "Medium",
                 "nodeSizeFamily": "MemoryOptimized",
@@ -158,24 +162,11 @@
                 "sessionLevelPackagesEnabled": false,
                 "cacheSize": 0,
                 "dynamicExecutorAllocation": {
-                    "enabled": true
+                    "enabled": true,
+                    "minExecutors": 3,
+                    "maxExecutors": 5
                 },
                 "provisioningState": "Succeeded"
-            }
-        },
-        {
-            "scope": "[concat('Microsoft.Storage/storageAccounts/', variables('synapseStorageName'))]",
-            "type": "Microsoft.Authorization/roleAssignments",
-            "apiVersion": "2020-04-01-preview",
-            "name": "[guid(uniqueString(variables('synapseStorageName')))]",
-            "location": "[variables('location')]",
-            "dependsOn": [
-              "[variables('synapseWorkspaceName')]"
-            ],
-            "properties": {
-              "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('StorageBlobDataContributor'))]",
-              "principalId": "[reference(resourceId('Microsoft.Synapse/workspaces', variables('synapseWorkspaceName')), '2019-06-01-preview', 'Full').identity.principalId]",
-              "principalType": "ServicePrincipal"
             }
         },
         { 

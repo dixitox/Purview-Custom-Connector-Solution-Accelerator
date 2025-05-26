@@ -11,6 +11,12 @@ if [ -z "${client_secret:-}" ]; then
   exit 1
 fi
 
+# Ensure sql_admin_password is set
+if [ -z "${sql_admin_password:-}" ]; then
+  echo "ERROR: sql_admin_password is not set. Please set it in settings.sh or export it before running this script."
+  exit 1
+fi
+
 # To run in Azure Cloud CLI, comment this section out
 # az login --output none
 # az account set --subscription "Early Access Engineering Subscription" --output none
@@ -23,7 +29,6 @@ base="pccsa" # must be < 7 chars, all letters
 
 # Names
 synapse_name=$base"synapse"
-purview_name=$base"purview"
 storage_name=$base"storage"
 resource_group=$base"_rg"
 key_vault_name=$base"keyvault"
@@ -78,6 +83,8 @@ if [ -z "$role_assignment_exists" ]; then
     --role "Key Vault Secrets Officer" \
     --scope "subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$key_vault_name" \
     --output none
+  echo "Waiting 60 seconds for role assignment to propagate..."
+  sleep 60
 else
   echo "Key Vault Secrets Officer role already assigned to signed-in user. Skipping."
 fi
@@ -95,55 +102,63 @@ echo "Retrieving client secret uri"
 # Get secret URI to fill in pipeline templates later
 client_secret_uri=$(az keyvault secret show --name client-secret --vault-name $key_vault_name --query 'value' -o tsv)
 
+# Store/retrieve Synapse SQL admin password in Key Vault
+existing_sql_admin_secret=$(az keyvault secret show --vault-name $key_vault_name --name synapse-sql-admin-password --query value -o tsv 2>/dev/null || true)
+if [ "$existing_sql_admin_secret" != "$sql_admin_password" ]; then
+  echo "Setting synapse-sql-admin-password in Key Vault."
+  az keyvault secret set --vault-name $key_vault_name --name synapse-sql-admin-password --value "$sql_admin_password" --output none >> log_connector_services_deploy.txt
+else
+  echo "synapse-sql-admin-password already set with the same value. Skipping."
+fi
+
+# Retrieve Synapse SQL admin password from Key Vault
+sql_admin_password_kv=$(az keyvault secret show --vault-name $key_vault_name --name synapse-sql-admin-password --query value -o tsv)
+
 ##################################################################################
 
 # Check if Purview account exists before deploying
-if az purview account show --name $purview_name --resource-group $resource_group --output none 2>/dev/null; then
-  echo "Purview account $purview_name already exists. Skipping deployment."
+if az purview account list --output none 2>/dev/null; then
+  purview_name=$(az purview account list --query "[0].name" -o tsv)
+  echo "Purview account $purview_name exists. Skipping deployment."
 else
-  echo "Starting Purview template deployment"
-  # Use template for deployment
-  params="{\"purviewName\":{\"value\":\"$purview_name\"}}"
-  az deployment group create --resource-group $resource_group --parameters $params --template-file ./arm/deploy_purview.json --output none >> log_connector_services_deploy.txt
+  echo "Purview account does not exists. Create a Microsoft Purview account"
 fi
 
 # Add app sp to Purview curator and reader roles only if not already assigned
-app_object_id=$(az ad sp list --display-name $client_name --query "[0].objectId" -o tsv)
+app_object_id=$object_id
 echo "App object id: $app_object_id"
-purview_resource="/subscriptions/$subscription_id/resourcegroups/$resource_group/providers/Microsoft.Purview/accounts/$purview_name"
-purview_data_curator_id=$(az role definition list --name "Purview Data Curator" --query "[].{name:name}" -o tsv)
-purview_data_reader_id=$(az role definition list --name "Purview Data Reader" --query "[].{name:name}" -o tsv)
-echo "purview_data_curator_id is $purview_data_curator_id" >> log_connector_services_deploy.txt
-echo "purview_data_reader_id is $purview_data_reader_id" >> log_connector_services_deploy.txt
+purview_resource="/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.Purview/accounts/$purview_name"
+
 # Check and assign curator role
-curator_assignment=$(az role assignment list --assignee $app_object_id --role "$purview_data_curator_id" --scope "$purview_resource" --query "[0]" -o tsv)
-if [ -z "$curator_assignment" ]; then
-  echo "Assigning Purview Data Curator role to app sp."
-  az role assignment create --assignee $app_object_id --role $purview_data_curator_id --scope $purview_resource --output none >> log_connector_services_deploy.txt
-else
-  echo "Purview Data Curator role already assigned to app sp. Skipping."
-fi
+
 # Check and assign reader role
-reader_assignment=$(az role assignment list --assignee $app_object_id --role "$purview_data_reader_id" --scope "$purview_resource" --query "[0]" -o tsv)
-if [ -z "$reader_assignment" ]; then
-  echo "Assigning Purview Data Reader role to app sp."
-  az role assignment create --assignee $app_object_id --role $purview_data_reader_id --scope $purview_resource --output none >> log_connector_services_deploy.txt
-else
-  echo "Purview Data Reader role already assigned to app sp. Skipping."
-fi
+
 
 ###############################################################################
 echo "Deploying Synapse ARM Template"
 # Use template for deployment
-params="{\"prefixName\":{\"value\":\"$base\"},"\
-"\"suffixName\":{\"value\":\"$svc_suffix\"},"\
-"\"synapseName\":{\"value\":\"$synapse_name\"}}"
+params="{\"prefixName\":{\"value\":\"$base\"},\
+\"synapseName\":{\"value\":\"$synapse_name\"},\
+\"suffixName\":{\"value\":\"$base\"},\
+\"AllowAll\":{\"value\":\"true\"},\
+\"sqlAdministratorLoginPassword\":{\"value\":\"$sql_admin_password_kv\"}}"
 az deployment group create --resource-group $resource_group --parameters $params --template-file ./arm/deploy_synapse.json --output none >> log_connector_services_deploy.txt
 
 echo "Setting KeyVault secret policy for Synapse"
-# Allow synapse pipelines (MIP) to retrieve keyvault secrets
+# For RBAC-enabled Key Vault, assign Key Vault Secrets User role to Synapse managed identity
 synapse_sp_id=$(az synapse workspace show --resource-group $resource_group --name $synapse_name --query 'identity.principalId' -o tsv)
-az keyvault set-policy -n $key_vault_name --secret-permissions get list --object-id $synapse_sp_id --output none >> log_connector_services_deploy.txt
+
+synapse_role_assignment_exists=$(az role assignment list --assignee $synapse_sp_id --all --query "[?roleDefinitionName=='Key Vault Secrets User' && scope=='/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$key_vault_name'] | [0]" -o tsv)
+if [ -z "$synapse_role_assignment_exists" ]; then
+  echo "Assigning Key Vault Secrets User role to Synapse managed identity ($synapse_sp_id)."
+  az role assignment create \
+    --assignee $synapse_sp_id \
+    --role "Key Vault Secrets User" \
+    --scope "subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.KeyVault/vaults/$key_vault_name" \
+    --output none >> log_connector_services_deploy.txt
+else
+  echo "Key Vault Secrets User role already assigned to Synapse managed identity. Skipping."
+fi
 
 echo "Creating linked services in Synapse"
 # Configure Synapse Notebooks and Pipelines
@@ -164,7 +179,7 @@ echo "Creating spark pool"
 if az synapse spark pool show --name notebookrun --workspace-name $synapse_name --resource-group $resource_group --output none 2>/dev/null; then
   echo "Synapse spark pool notebookrun already exists. Skipping creation."
 else
-  az synapse spark pool create --name notebookrun --workspace-name $synapse_name --resource-group $resource_group --spark-version 2.4 --node-count 10 --node-size Medium --delay 10 --enable-auto-pause true --output none >> log_connector_services_deploy.txt
+  az synapse spark pool create --name notebookrun --workspace-name $synapse_name --resource-group $resource_group --spark-version 3.3 --node-count 10 --node-size Medium --delay 10 --enable-auto-pause true --min-executors 3 --max-executors 10 --output none >> log_connector_services_deploy.txt
   # Add packages
   az synapse spark pool update --name notebookrun --workspace-name $synapse_name --resource-group $resource_group --library-requirements ./requirements.txt --output none >> log_connector_services_deploy.txt
 fi
@@ -206,32 +221,81 @@ fi
 ##################################################################################
 
 echo "Deploying Storage ARM Template"
-# Use template for deployment
-params="{\"synapseName\":{\"value\":\"$synapse_name\"},"\
-"\"storageName\":{\"value\":\"$storage_name\"}}"
-az deployment group create --resource-group $resource_group --parameters $params --template-file ./arm/deploy_storage.json --output none >> log_connector_services_deploy.txt
+# Use template for deployment - ensure all parameters match exactly what the template expects
+params="{\"synapseName\":{\"value\":\"$synapse_name\"},\"storageName\":{\"value\":\"$storage_name\"}}"
+az deployment group create --resource-group $resource_group --parameters $params --template-file ./arm/deploy_storage.json --output none --no-prompt >> log_connector_services_deploy.txt 2>&1
+
+# Get storage account key and add to keyvault secrets
+echo "Getting storage account key..."
+if ! storage_account_key=$(az storage account keys list --resource-group $resource_group --account-name $storage_name --query [0].value -o tsv 2>> log_connector_services_deploy.txt); then
+  echo "ERROR: Failed to retrieve storage account key. Check if storage account '$storage_name' exists in resource group '$resource_group'."
+  echo "Trying to proceed with other steps..."
+else
+  echo "Successfully retrieved storage account key."
+  
+  # Storage account key secret
+  echo "Checking if storage account key already exists in Key Vault..."
+  existing_storage_key_secret=$(az keyvault secret show --vault-name $key_vault_name --name storage-account-key --query value -o tsv 2>/dev/null || echo "")
+  
+  if [ -z "$storage_account_key" ]; then
+    echo "WARNING: Retrieved storage account key is empty. Skipping Key Vault update."
+  elif [ "$existing_storage_key_secret" != "$storage_account_key" ]; then
+    echo "Setting storage-account-key in Key Vault '$key_vault_name'..."
+    az keyvault secret set --vault-name $key_vault_name --name storage-account-key --value "$storage_account_key" --output none >> log_connector_services_deploy.txt 2>&1
+    echo "Storage account key successfully saved to Key Vault."
+  else
+    echo "Storage account key already set with the same value. Skipping."
+  fi
+fi
 
 echo "Creating folder structure in ADLS"
 # Create storage dir structure
-if az storage fs directory exists -f pccsa --account-name $storage_name -p incoming --output tsv | grep -q true; then
+# First, ensure we have the right storage account permissions
+echo "Getting Synapse managed identity"
+synapse_id=$(az synapse workspace show --resource-group $resource_group --name $synapse_name --query identity.principalId -o tsv)
+
+echo "Ensuring Storage Blob Data Contributor role is assigned to current user and Synapse"
+current_user_id=$(az ad signed-in-user show --query id -o tsv)
+# Assign Storage Blob Data Contributor role to current user
+az role assignment create --assignee $current_user_id --role "Storage Blob Data Contributor" --scope "/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.Storage/storageAccounts/$storage_name" --output none 2>/dev/null || true
+# Assign Storage Blob Data Contributor role to Synapse managed identity
+az role assignment create --assignee $synapse_id --role "Storage Blob Data Contributor" --scope "/subscriptions/$subscription_id/resourceGroups/$resource_group/providers/Microsoft.Storage/storageAccounts/$storage_name" --output none 2>/dev/null || true
+
+echo "Waiting for role assignments to propagate (30 seconds)..."
+sleep 30
+
+# Try with OAuth authentication first
+if az storage fs directory exists -f pccsa --account-name $storage_name --name incoming --auth-mode login --output tsv 2>/dev/null | grep -q true; then
   echo "ADLS directory structure already exists. Skipping creation."
 else
+  echo "Creating local directory structure"
+  [ -d pccsa_main ] && rm -rf pccsa_main
   mkdir pccsa_main; cd pccsa_main; mkdir incoming; touch ./incoming/tmp; mkdir processed; touch ./processed/tmp; cd ..
-  # Upload dir structure to storage
-  az storage fs directory upload -f pccsa --account-name $storage_name -s ./pccsa_main -d . --recursive --output none >> log_connector_services_deploy.txt
+  
+  echo "Uploading directory structure to storage with OAuth"
+  # Try with OAuth first
+  az storage fs directory create -f pccsa --account-name $storage_name --name incoming --auth-mode login --output none 2>> log_connector_services_deploy.txt || \
+  az storage fs directory create -f pccsa --account-name $storage_name --name incoming --auth-mode key --account-key "$storage_account_key" --output none 2>> log_connector_services_deploy.txt
+  
+  az storage fs directory create -f pccsa --account-name $storage_name --name processed --auth-mode login --output none 2>> log_connector_services_deploy.txt || \
+  az storage fs directory create -f pccsa --account-name $storage_name --name processed --auth-mode key --account-key "$storage_account_key" --output none 2>> log_connector_services_deploy.txt
+  
+  # Create placeholder files
+  echo "Creating placeholder files"
+  touch pccsa_main/incoming/placeholder.txt
+  touch pccsa_main/processed/placeholder.txt
+  
+  # Upload placeholder files
+  echo "Uploading placeholder files"
+  az storage fs file upload -f pccsa --path incoming/placeholder.txt --source pccsa_main/incoming/placeholder.txt --account-name $storage_name --auth-mode login --output none 2>> log_connector_services_deploy.txt || \
+  az storage fs file upload -f pccsa --path incoming/placeholder.txt --source pccsa_main/incoming/placeholder.txt --account-name $storage_name --auth-mode key --account-key "$storage_account_key" --output none 2>> log_connector_services_deploy.txt
+  
+  az storage fs file upload -f pccsa --path processed/placeholder.txt --source pccsa_main/processed/placeholder.txt --account-name $storage_name --auth-mode login --output none 2>> log_connector_services_deploy.txt || \
+  az storage fs file upload -f pccsa --path processed/placeholder.txt --source pccsa_main/processed/placeholder.txt --account-name $storage_name --auth-mode key --account-key "$storage_account_key" --output none 2>> log_connector_services_deploy.txt
+  
   # Remove tmp directory structure
+  echo "Cleaning up local directory"
   rm -r pccsa_main
-fi
-
-# Get storage account key and add to keyvault secrets
-storage_account_key=$(az storage account keys list --resource-group $resource_group --account-name $storage_name --query [0].value -o tsv)
-# Storage account key secret
-existing_storage_key_secret=$(az keyvault secret show --vault-name $key_vault_name --name storage-account-key --query value -o tsv 2>/dev/null)
-if [ "$existing_storage_key_secret" != "$storage_account_key" ]; then
-  echo "Setting storage-account-key in Key Vault."
-  az keyvault secret set --vault-name $key_vault_name --name storage-account-key --value $storage_account_key --output none >> log_connector_services_deploy.txt
-else
-  echo "storage-account-key already set with the same value. Skipping."
 fi
 
 ##################################################################################
@@ -247,5 +311,3 @@ echo "tenant_id=$tenant_id" >> ./export_names.sh
 echo "subscription_id=$subscription_id" >> ./export_names.sh
 echo "resource_group=$resource_group" >> ./export_names.sh
 echo "prefix=$base" >> ./export_names.sh
-echo "suffix=$svc_suffix" >> ./export_names.sh
-
