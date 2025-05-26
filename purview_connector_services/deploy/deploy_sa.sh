@@ -100,7 +100,7 @@ fi
 
 echo "Retrieving client secret uri"
 # Get secret URI to fill in pipeline templates later
-client_secret_uri=$(az keyvault secret show --name client-secret --vault-name $key_vault_name --query 'value' -o tsv)
+client_secret_uri=$(az keyvault secret show --name client-secret --vault-name $key_vault_name --query 'id' -o tsv)
 
 # Store/retrieve Synapse SQL admin password in Key Vault
 existing_sql_admin_secret=$(az keyvault secret show --vault-name $key_vault_name --name synapse-sql-admin-password --query value -o tsv 2>/dev/null || true)
