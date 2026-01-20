@@ -11,9 +11,22 @@ products:
 
 # Purview Custom Connector Solution Accelerator
 
+> **🎯 New to this solution?** Start with the [Pre-Flight Checklist](PREFLIGHT_CHECKLIST.md) then follow the [Quick Start Guide](QUICK_START.md) for a streamlined 3-4 hour implementation.
+
 Microsoft Purview is a unified data governance service that helps you manage and govern your on-premises, multi-cloud, and software-as-a-service (SaaS) data. Microsoft Purview Data Map provides the foundation for data discovery and effective data governance, however, no solution can support scanning metadata for all existing data sources or lineage for every ETL tool or process that exists today. That is why Purview was built for extensibility using the open Apache Atlas API set. This API set allows customers to develop their own scanning capabilities for data sources or ETL tools which are not yet supported out of the box. This Solution Accelerator is designed to jump start the development process and provide patterns and reusable tooling to help accelerate the creation of Custom Connectors for Microsoft Purview.
 
 The accelerator includes documentation, resources and examples to inform about the custom connector development process, tools, and APIs. It further works with utilities to make it easier to create a meta-model for your connector (Purview Custom Types Tool) with examples including ETL tool lineage as well as a custom data source. It includes infrastructure / architecture to support scanning of on-prem and complex data sources using Microsoft Fabric Spark for compute and Fabric Data Pipelines for orchestration.
+
+## 📚 Documentation Quick Links
+
+| Document | Purpose | Time |
+|----------|---------|------|
+| [Pre-Flight Checklist](PREFLIGHT_CHECKLIST.md) | Verify you have everything before starting | 10 min |
+| [Quick Start Guide](QUICK_START.md) | Fastest path to a working deployment | 3-4 hours |
+| [Implementation Guide](IMPLEMENTATION_GUIDE.md) | Detailed step-by-step instructions | Reference |
+| [Implementation Flow](IMPLEMENTATION_FLOW.md) | Visual diagrams and data flow | Reference |
+| [Fabric Migration Notes](FABRIC_MIGRATION_NOTES.md) | Synapse to Fabric migration details | Reference |
+| [Troubleshooting](Troubleshooting.md) | Common issues and solutions | As needed |
 
 ## Applicability
 
@@ -67,11 +80,20 @@ Using Fabric Data Pipelines and Spark pools for connector development offers a n
 
 ## Getting Started
 
+### 🚀 Quick Start (Recommended)
+
+**New to this solution?** Start here for a streamlined implementation:
+- **[Quick Start Guide](QUICK_START.md)** - Get up and running in 3-4 hours
+- **[Detailed Implementation Guide](IMPLEMENTATION_GUIDE.md)** - Comprehensive step-by-step instructions
+- **[Fabric Migration Notes](FABRIC_MIGRATION_NOTES.md)** - Important notes about the Fabric migration
+
 ### Deploy Resources / Configuration
 
 #### Deploy Base Services
 
 Instructions for deploying the base connector services, which includes deployment of Microsoft Fabric workspace, Purview, and Fabric notebooks and pipelines for ingesting custom types into Purview can be found in the [Base Services Deployment Doc](./purview_connector_services/deploy/deploy_sa.md)
+
+**Note:** Microsoft Fabric requires some manual configuration steps. See the [Implementation Guide](IMPLEMENTATION_GUIDE.md) for detailed instructions.
 
 #### Deploy the Purview Custom Types Tool
 
