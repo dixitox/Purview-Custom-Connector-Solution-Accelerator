@@ -86,7 +86,7 @@ Follow the instructions for deploying the base solution under [purview_connector
   * Go to "Select Source", select "Project Deployment" and browse for the .ispac file you created above.  Select "Next"
   * Under Select Deployment Target, choose SSIS in SQL Server to mimic on prem SQL SSIS environment
   * Under Select Destination choose to browse for the server name and select the local instance
-  * Choose to browse for the path, select SSISDB and then choose to create a new folder.  Call it 'ssistest' and choose "OK" (The name is important as it must match the name in the Synapse pipeline FolderName parameter)
+  * Choose to browse for the path, select SSISDB and then choose to create a new folder.  Call it 'ssistest' and choose "OK" (The name is important as it must match the name in the Fabric pipeline FolderName parameter)
   * Choose next to review your options, then choose "Deploy"
 
 ## Automation Services

@@ -4,7 +4,7 @@
         "activities": [
             {
                 "name": "Purview Custom Types",
-                "type": "SynapseNotebook",
+                "type": "SparkNotebook",
                 "dependsOn": [
                     {
                         "activity": "AccSecret-to-var",
@@ -127,5 +127,5 @@
         "annotations": [],
         "lastPublishTime": "2021-05-14T21:45:04Z"
     },
-    "type": "Microsoft.Synapse/workspaces/pipelines"
+    "type": "Microsoft.DataFactory/factories/pipelines"
 }

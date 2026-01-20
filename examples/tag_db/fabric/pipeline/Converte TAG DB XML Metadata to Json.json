@@ -59,7 +59,7 @@
             },
             {
                 "name": "Generate TAG DB Metadata",
-                "type": "SynapseNotebook",
+                "type": "SparkNotebook",
                 "dependsOn": [
                     {
                         "activity": "Convert TAG DB XML METADATA to JSON",

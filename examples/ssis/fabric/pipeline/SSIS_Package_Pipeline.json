@@ -247,7 +247,7 @@
                         },
                         {
                             "name": "SSIS Scan",
-                            "type": "SynapseNotebook",
+                            "type": "SparkNotebook",
                             "dependsOn": [
                                 {
                                     "activity": "SSIS Package transform to JSON",
@@ -501,5 +501,5 @@
         "annotations": [],
         "lastPublishTime": "2021-05-17T23:19:40Z"
     },
-    "type": "Microsoft.Synapse/workspaces/pipelines"
+    "type": "Microsoft.DataFactory/factories/pipelines"
 }

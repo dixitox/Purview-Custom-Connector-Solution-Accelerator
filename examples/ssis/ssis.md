@@ -116,7 +116,7 @@ Rename the type from ssis_package_copy to legacy_ssis_package and choose the opt
 
 ### Run the SSIS Pipeline
 
-* In Synapse Analytics Workspace, navigate to the SSIS_Package_Pipeline. All parameters and variables should be preconfigured. You can click on the pipeline background and choose the Parameters tab to examine the values
+* In Microsoft Fabric Workspace, navigate to the SSIS_Package_Pipeline. All parameters and variables should be preconfigured. You can click on the pipeline background and choose the Parameters tab to examine the values
 
   ![run_ssis_pipeline.png](../../assets/images/run_ssis_pipeline.png)
 

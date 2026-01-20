@@ -47,12 +47,12 @@ If you would like to trigger the pipeline based on incoming entity data, you nee
 
 * Go to the pipelines view in the Generic Connector pipeline. Click on Trigger and then New/Edit
 
-![synapse_edit_trigger.svg](../assets/images/synapse_edit_trigger.png)
+![fabric_edit_trigger.svg](../assets/images/fabric_edit_trigger.png)
 
 * Select the 'Trigger Load Custom Type' trigger to edit
 
-![synapse_select_trigger.svg](../assets/images/synapse_select_trigger.png)
+![fabric_select_trigger.svg](../assets/images/fabric_select_trigger.png)
 
 * At the bottom of the screen change the status to 'started' and then press 'continue'
 
-![synapse_start_trigger.svg](../assets/images/synapse_start_trigger.png)
+![fabric_start_trigger.svg](../assets/images/fabric_start_trigger.png)

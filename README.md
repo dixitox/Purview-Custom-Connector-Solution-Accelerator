@@ -5,7 +5,7 @@ languages:
 - bash
 products:
 - microsoft-purview
-- azure-synapse-analytics
+- microsoft-fabric
 ---
 ![Purview Custom Connector Solution Accelerator Banner](./assets/images/pccsa.png)
 
@@ -13,7 +13,7 @@ products:
 
 Microsoft Purview is a unified data governance service that helps you manage and govern your on-premises, multi-cloud, and software-as-a-service (SaaS) data. Microsoft Purview Data Map provides the foundation for data discovery and effective data governance, however, no solution can support scanning metadata for all existing data sources or lineage for every ETL tool or process that exists today. That is why Purview was built for extensibility using the open Apache Atlas API set. This API set allows customers to develop their own scanning capabilities for data sources or ETL tools which are not yet supported out of the box. This Solution Accelerator is designed to jump start the development process and provide patterns and reusable tooling to help accelerate the creation of Custom Connectors for Microsoft Purview.
 
-The accelerator includes documentation, resources and examples to inform about the custom connector development process, tools, and APIs. It further works with utilities to make it easier to create a meta-model for your connector (Purview Custom Types Tool) with examples including ETL tool lineage as well as a custom data source. It includes infrastructure / architecture to support scanning of on-prem and complex data sources using Azure Synapse Spark for compute and Synapse pipelines for orchestration.
+The accelerator includes documentation, resources and examples to inform about the custom connector development process, tools, and APIs. It further works with utilities to make it easier to create a meta-model for your connector (Purview Custom Types Tool) with examples including ETL tool lineage as well as a custom data source. It includes infrastructure / architecture to support scanning of on-prem and complex data sources using Microsoft Fabric Spark for compute and Fabric Data Pipelines for orchestration.
 
 ## Applicability
 
@@ -31,9 +31,9 @@ The examples provided demonstrate how the design and services can be used to acc
 
 ![Purview Custom Connector Solution Accelerator Design](./assets/images/pccsa-design.svg)
 
-This accelerator uses Azure Synapse for compute and orchestration. Getting and transforming source metadata is done using Synapse notebooks, and is orchestrated and combined with other Azure Services using Synapse pipelines. Once a solution is developed (see development process below) running the solution involves the following steps:
+This accelerator uses Microsoft Fabric for compute and orchestration. Getting and transforming source metadata is done using Fabric notebooks, and is orchestrated and combined with other Azure Services using Fabric Data Pipelines. Once a solution is developed (see development process below) running the solution involves the following steps:
 
-1. Scan of custom source is triggered through Synapse pipeline
+1. Scan of custom source is triggered through Fabric Data Pipeline
 2. Custom source notebook code pulls source data and transforms into Atlas json - predefined custom types
 3. Data is written into folder in ADLS
 4. Data write triggers Purview Entity import notebook pipeline
@@ -57,9 +57,9 @@ Meta-data parsing is one of the more time consuming aspects of Purview Custom Co
 
 #### Define pipeline and triggers for source connection
 
-All of the above activities are orchestrated through a Synapse pipeline. The [SSIS Pipeline](./examples/ssis/ssis.md#define-the-ssis-pipeline) demonstrates a complex example designed to mimic what is found in real customer scenarios. The [Tag DB](./examples/tag_db/tag_db.md) example focuses more on the meta-modeling and Purview visualization of the data.
+All of the above activities are orchestrated through a Fabric Data Pipeline. The [SSIS Pipeline](./examples/ssis/ssis.md#define-the-ssis-pipeline) demonstrates a complex example designed to mimic what is found in real customer scenarios. The [Tag DB](./examples/tag_db/tag_db.md) example focuses more on the meta-modeling and Purview visualization of the data.
 
-Using Synapse pipelines and Spark pools for connector development offers a number of advantages including:
+Using Fabric Data Pipelines and Spark pools for connector development offers a number of advantages including:
 
 * UI view of pipeline and parameters allowing operators to run and configure pipelines and view results in a standardized way
 * Built in support for logging
@@ -71,7 +71,7 @@ Using Synapse pipelines and Spark pools for connector development offers a numbe
 
 #### Deploy Base Services
 
-Instructions for deploying the base connector services, which includes deployment of Synapse, Purview, and Synapse notebooks and pipelines for ingesting custom types into Purview can be found in the [Base Services Deployment Doc](./purview_connector_services/deploy/deploy_sa.md)
+Instructions for deploying the base connector services, which includes deployment of Microsoft Fabric workspace, Purview, and Fabric notebooks and pipelines for ingesting custom types into Purview can be found in the [Base Services Deployment Doc](./purview_connector_services/deploy/deploy_sa.md)
 
 #### Deploy the Purview Custom Types Tool
 
@@ -99,7 +99,7 @@ Documentation​​​​​​​ and notebook samples
 
 ## Note about Libraries with MPL-2.0 and LGPL-2.1 Licenses
 
-The following libraries are not **explicitly included** in this repository, but users who use this Solution Accelerator may need to install them locally and in Azure Synapse to fully utilize this Solution Accelerator. However, the actual binaries and files associated with the libraries **are not included** as part of this repository, but they are available for installation via the PyPI library using the pip installation tool.
+The following libraries are not **explicitly included** in this repository, but users who use this Solution Accelerator may need to install them locally and in Microsoft Fabric to fully utilize this Solution Accelerator. However, the actual binaries and files associated with the libraries **are not included** as part of this repository, but they are available for installation via the PyPI library using the pip installation tool.
 
 ## Contributing
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.opensource.microsoft.com.

@@ -1,20 +1,23 @@
 {
-    "name": "Json1",
+    "name": "Xml2",
     "properties": {
         "linkedServiceName": {
             "referenceName": "purviewaccws-WorkspaceDefaultStorage",
             "type": "LinkedServiceReference"
         },
         "annotations": [],
-        "type": "Json",
+        "type": "Xml",
         "typeProperties": {
             "location": {
                 "type": "AzureBlobFSLocation",
-                "folderPath": "pccsa_main/ssis-connector/working",
+                "fileName": {
+                    "value": "endswith(conmgr)",
+                    "type": "Expression"
+                },
+                "folderPath": "pccsa_main/ssis-connector/ssis-package",
                 "fileSystem": "pccsa"
             }
-        },
-        "schema": {}
+        }
     },
-    "type": "Microsoft.Synapse/workspaces/datasets"
+    "type": "Microsoft.DataFactory/factories/datasets"
 }

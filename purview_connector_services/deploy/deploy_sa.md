@@ -8,7 +8,7 @@
 
 ### Create an application identity and corresponding secret
 
- This will be the identity used for access to the Purview workspace from the Custom Type Tool application and from the synapse connector services. See [Create a service principal](https://docs.microsoft.com/en-us/azure/purview/tutorial-using-rest-apis#create-a-service-principal-application)
+ This will be the identity used for access to the Purview workspace from the Custom Type Tool application and from the Fabric connector services. See [Create a service principal](https://docs.microsoft.com/en-us/azure/purview/tutorial-using-rest-apis#create-a-service-principal-application)
 
 ### Clone the repository into Azure cloud shell
 
@@ -83,9 +83,9 @@ git clone https://github.com/microsoft/Purview-Custom-Connector-Solution-Acceler
   * Save secret URL
 * Deploy Purview
   * Add app sp to purview roles
-* Deploy Synapse
-  * Add Synapse to storage roles
-  * Add Synapse to retrieve KeyVault secrets
+* Deploy Microsoft Fabric Workspace
+  * Add Fabric workspace to storage roles
+  * Add Fabric workspace to retrieve KeyVault secrets
   * Create linked service to storage
   * Create spark pool
   * Add package dependencies (PyApacheAtlas)

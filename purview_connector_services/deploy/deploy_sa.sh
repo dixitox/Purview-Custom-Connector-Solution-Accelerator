@@ -18,7 +18,7 @@ base="pccsa" # must be < 7 chars, all letters
 let svc_suffix=$RANDOM*$RANDOM
 
 # Names
-synapse_name=$base"synapse"$svc_suffix
+fabric_workspace_name=$base"fabric"$svc_suffix
 purview_name=$base"purview"$svc_suffix
 storage_name=$base"storage"$svc_suffix
 resource_group=$base"_rg_"$svc_suffix
@@ -71,66 +71,75 @@ az role assignment create --assignee $app_object_id --role $purview_data_curator
 az role assignment create --assignee $app_object_id --role $purview_data_reader_id --scope $purview_resource --output none >> log_connector_services_deploy.txt
 
 ###############################################################################
-echo "Deploying Synapse ARM Template"
-# Use template for deployment
+echo "Deploying Microsoft Fabric Workspace"
+# NOTE: Microsoft Fabric workspace deployment requires Power BI REST API or Fabric API
+# Use template for deployment - THIS WILL NEED TO BE UPDATED FOR FABRIC
 params="{\"prefixName\":{\"value\":\"$base\"},"\
 "\"suffixName\":{\"value\":\"$svc_suffix\"},"\
-"\"synapseName\":{\"value\":\"$synapse_name\"}}"
-az deployment group create --resource-group $resource_group --parameters $params --template-file ./arm/deploy_synapse.json --output none >> log_connector_services_deploy.txt
+"\"fabricWorkspaceName\":{\"value\":\"$fabric_workspace_name\"}}"
+# az deployment group create --resource-group $resource_group --parameters $params --template-file ./arm/deploy_fabric.json --output none >> log_connector_services_deploy.txt
 
-echo "Setting KeyVault secret policy for Synapse"
-# Allow synapse pipelines (MIP) to retrieve keyvault secrets
-synapse_sp_id=$(az synapse workspace show --resource-group $resource_group --name $synapse_name --query 'identity.principalId' -o tsv)
-az keyvault set-policy -n $key_vault_name --secret-permissions get list --object-id $synapse_sp_id --output none >> log_connector_services_deploy.txt
+echo "Setting KeyVault secret policy for Fabric Workspace"
+# Allow Fabric workspace to retrieve keyvault secrets
+# NOTE: This will need to be updated for Fabric workspace identity
+# fabric_sp_id=$(az ... --query 'identity.principalId' -o tsv)
+# az keyvault set-policy -n $key_vault_name --secret-permissions get list --object-id $fabric_sp_id --output none >> log_connector_services_deploy.txt
 
-echo "Creating linked services in Synapse"
-# Configure Synapse Notebooks and Pipelines
+echo "Creating linked services in Fabric Workspace"
+# Configure Fabric Notebooks and Pipelines
+# NOTE: Fabric uses different approach for linked services via Lakehouse or other connections
 # Add storage account name to linked service json
-sed "s/<tag_storage_account>/$storage_name/g" ../synapse/linked_service/purviewaccws-WorkspaceDefaultStorage.json > ../synapse/linked_service/purviewaccws-WorkspaceDefaultStorage-tmp.json
-# Create linked service in Synapse
-az synapse linked-service create --workspace-name $synapse_name --name purviewaccws-WorkspaceDefaultStorage --file @../synapse/linked_service/purviewaccws-WorkspaceDefaultStorage-tmp.json --output none >> log_connector_services_deploy.txt
-# Delete the tmp json with the added storage account name
-rm ../synapse/linked_service/purviewaccws-WorkspaceDefaultStorage-tmp.json
+sed "s/<tag_storage_account>/$storage_name/g" ../fabric/linked_service/purviewaccws-WorkspaceDefaultStorage.json > ../fabric/linked_service/purviewaccws-WorkspaceDefaultStorage-tmp.json
+# Create linked service in Fabric - THIS WILL NEED TO BE UPDATED FOR FABRIC API
+# Fabric uses lakehouse connections or other connection types
+# az ... create linked service using Fabric API
+rm ../fabric/linked_service/purviewaccws-WorkspaceDefaultStorage-tmp.json
 
-echo "Creating spark pool"
-# Create SPARK pool
-az synapse spark pool create --name notebookrun --workspace-name $synapse_name --resource-group $resource_group --spark-version 2.4 --node-count 10 --node-size Medium --delay 10 --enable-auto-pause true --output none >> log_connector_services_deploy.txt
-# Add packages
-az synapse spark pool update --name notebookrun --workspace-name $synapse_name --resource-group $resource_group --library-requirements ./requirements.txt --output none >> log_connector_services_deploy.txt
+echo "Creating Fabric Spark pool"
+# NOTE: Fabric Spark pools are created differently than Synapse
+# In Fabric, you create a Spark compute in the workspace settings or via API
+# This will need to be updated to use Fabric REST API or PowerShell cmdlets
+# Create Fabric SPARK pool - PLACEHOLDER
+# Add packages - In Fabric, packages are managed via environment or notebook settings
+echo "Package management in Fabric is done via Spark environment or library management"
 
-echo "Creating Synapse notebooks"
-# Note: add notebooks and attach to sparkpool
-az synapse notebook create --workspace-name $synapse_name --spark-pool-name notebookrun --name Purview_Load_Entity --file @../synapse/notebook/Purview_Load_Entity.ipynb --output none
+echo "Creating Fabric notebooks"
+# NOTE: Fabric notebooks are imported via the Fabric UI or REST API
+# The Azure CLI does not have native Fabric notebook commands
+# Notebooks should be imported manually or via Fabric REST API
+# az ... fabric notebook create - PLACEHOLDER FOR FABRIC API
+echo "Notebooks need to be imported via Fabric workspace UI or REST API"
 
-echo "Creating Synapse pipelines"
+echo "Creating Fabric Data Pipelines"
 # Build multiple substitutions for pipeline json - note sed can use any delimeter so url changed to avoid conflict with slash char
 pipeline_sub="s/<tag_storage_account>/$storage_name/;"\
 "s/<tag_purview_account>/$purview_name/;"\
 "s/<tag_tenant_id>/$tenant_id/;"\
 "s/<tag_client_id>/$client_id/;"\
 "s@<tag_secret_uri>@$client_secret_uri?api-version=7.0@"
-sed $pipeline_sub '../synapse/pipeline/Purview Load Custom Types.json' > '../synapse/pipeline/Purview Load Custom Types-tmp.json'
-# Create pipeline in Synapse
-az synapse pipeline create --workspace-name $synapse_name --name 'Purview Load Custom Types' --file '@../synapse/pipeline/Purview Load Custom Types-tmp.json' --output none >> log_connector_services_deploy.txt
+sed $pipeline_sub '../fabric/pipeline/Purview Load Custom Types.json' > '../fabric/pipeline/Purview Load Custom Types-tmp.json'
+# Create pipeline in Fabric - THIS WILL NEED TO BE UPDATED FOR FABRIC API
+# Fabric Data Pipelines use different API than Synapse
+echo "Pipelines need to be imported via Fabric workspace UI or REST API"
 # Delete the tmp json
-rm '../synapse/pipeline/Purview Load Custom Types-tmp.json'
+rm '../fabric/pipeline/Purview Load Custom Types-tmp.json'
 
-echo "Creating Synapse pipeline trigger"
+echo "Creating Fabric pipeline trigger"
 # Build multiple substitutions for trigger json
 pipeline_sub="s/<tag_subscription_id>/$subscription_id/;"\
 "s/<tag_resource_group>/$resource_group/;"\
 "s/<tag_storage_account>/$storage_name/"
-sed $pipeline_sub '../synapse/trigger/Trigger Load Custom Type.json' > '../synapse/trigger/Trigger Load Custom Type-tmp.json'
-# Create trigger in Synapse
-az synapse trigger create --workspace-name $synapse_name --name 'Trigger Load Custom Type' --file '@../synapse/trigger/Trigger Load Custom Type-tmp.json' --output none >> log_connector_services_deploy.txt
+sed $pipeline_sub '../fabric/trigger/Trigger Load Custom Type.json' > '../fabric/trigger/Trigger Load Custom Type-tmp.json'
+# Create trigger in Fabric - THIS WILL NEED TO BE UPDATED FOR FABRIC API
+echo "Triggers need to be created via Fabric workspace UI or REST API"
 # Delete the tmp json
-rm '../synapse/trigger/Trigger Load Custom Type-tmp.json'
+rm '../fabric/trigger/Trigger Load Custom Type-tmp.json'
 
 ##################################################################################
 
 echo "Deploying Storage ARM Template"
 # Use template for deployment
-params="{\"synapseName\":{\"value\":\"$synapse_name\"},"\
+params="{\"fabricWorkspaceName\":{\"value\":\"$fabric_workspace_name\"},"\
 "\"storageName\":{\"value\":\"$storage_name\"}}"
 az deployment group create --resource-group $resource_group --parameters $params --template-file ./arm/deploy_storage.json --output none >> log_connector_services_deploy.txt
 
@@ -151,7 +160,7 @@ echo "Writing name output"
 echo '#!/bin/bash' > ./export_names.sh
 echo >> ./export_names.sh
 echo "key_vault_name=$key_vault_name" >> ./export_names.sh
-echo "synapse_name=$synapse_name" >> ./export_names.sh
+echo "fabric_workspace_name=$fabric_workspace_name" >> ./export_names.sh
 echo "purview_name=$purview_name" >> ./export_names.sh
 echo "storage_name=$storage_name" >> ./export_names.sh
 echo "tenant_id=$tenant_id" >> ./export_names.sh

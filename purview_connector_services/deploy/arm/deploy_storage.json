@@ -6,8 +6,11 @@
         "storageName": {
             "type": "string"
         },
-        "synapseName": {
-            "type": "string"
+        "fabricWorkspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Microsoft Fabric workspace - NOTE: Fabric workspace identity needs to be configured separately"
+            }
         }
     },
 
@@ -91,9 +94,10 @@
             "location": "[variables('location')]",
             "properties": {
               "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('StorageBlobDataContributor'))]",
-              "principalId": "[reference(resourceId('Microsoft.Synapse/workspaces', parameters('synapseName')), '2019-06-01-preview', 'Full').identity.principalId]",
+              "principalId": "FABRIC_WORKSPACE_PRINCIPAL_ID_PLACEHOLDER",
               "principalType": "ServicePrincipal"
-            }
+            },
+            "comments": "NOTE: Fabric workspace identity must be configured manually or via separate deployment. Replace FABRIC_WORKSPACE_PRINCIPAL_ID_PLACEHOLDER with actual workspace identity."
         },
         { 
             "apiVersion": "2020-10-01",

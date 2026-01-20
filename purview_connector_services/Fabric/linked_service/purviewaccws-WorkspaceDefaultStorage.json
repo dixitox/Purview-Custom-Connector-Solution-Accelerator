@@ -1,6 +1,6 @@
 {
     "name": "purviewaccws-WorkspaceDefaultStorage",
-    "type": "Microsoft.Synapse/workspaces/linkedservices",
+    "type": "Microsoft.DataFactory/factories/linkedservices",
     "properties": {
         "typeProperties": {
             "url": "https://<tag_storage_account>.dfs.core.windows.net"
