@@ -1,0 +1,40 @@
+# Azure Developer CLI (azd) environment files
+.azure/
+*.env
+
+# Azure CLI
+.azure_config/
+
+# Bicep outputs
+*.parameters.json.bak
+
+# Logs
+log_*.txt
+*.log
+
+# Temporary files
+*.tmp
+*-tmp.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+
+# Secrets (never commit)
+settings.sh
+*.secret
+*.key
