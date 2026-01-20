@@ -68,12 +68,34 @@ PURVIEW_ACCOUNTS=$(az purview account list --query "[].name" -o tsv 2>/dev/null 
 if [ -z "$PURVIEW_ACCOUNTS" ]; then
     echo -e "${YELLOW}No existing Purview accounts found.${NC}"
     PURVIEW_ACCOUNT_NAME=""
+    PURVIEW_RESOURCE_GROUP=""
 else
     echo -e "${GREEN}Found existing Purview account(s):${NC}"
     echo "$PURVIEW_ACCOUNTS" | nl
     echo ""
     echo -e "${YELLOW}Note: You can only have ONE Purview account per Azure tenant.${NC}"
     read -p "Enter Purview account name to reuse (or press Enter to create new): " PURVIEW_ACCOUNT_NAME
+    
+    if [ -n "$PURVIEW_ACCOUNT_NAME" ]; then
+        # Get the resource group of the existing Purview account
+        echo -e "${YELLOW}Detecting Purview account resource group...${NC}"
+        PURVIEW_RESOURCE_GROUP=$(az purview account show --name "$PURVIEW_ACCOUNT_NAME" --query "resourceGroup" -o tsv 2>/dev/null | grep -v '^WARNING:' | grep -v '^ERROR:' | tr -d '\r\n')
+        
+        if [ -n "$PURVIEW_RESOURCE_GROUP" ]; then
+            echo -e "${GREEN}[OK] Detected resource group: ${PURVIEW_RESOURCE_GROUP}${NC}"
+            read -p "Is this correct? (y/n) [default: y]: " CONFIRM_RG
+            CONFIRM_RG=${CONFIRM_RG:-y}
+            
+            if [[ ! "$CONFIRM_RG" =~ ^[Yy]$ ]]; then
+                read -p "Enter the resource group name for the Purview account: " PURVIEW_RESOURCE_GROUP
+            fi
+        else
+            echo -e "${YELLOW}[WARNING] Could not auto-detect resource group${NC}"
+            read -p "Enter the resource group name where Purview account '$PURVIEW_ACCOUNT_NAME' is located: " PURVIEW_RESOURCE_GROUP
+        fi
+    else
+        PURVIEW_RESOURCE_GROUP=""
+    fi
 fi
 
 echo ""
@@ -132,6 +154,7 @@ azd env set BASE_NAME "$BASE_NAME"
 
 if [ -n "$PURVIEW_ACCOUNT_NAME" ]; then
     azd env set PURVIEW_ACCOUNT_NAME "$PURVIEW_ACCOUNT_NAME"
+    azd env set PURVIEW_RESOURCE_GROUP "$PURVIEW_RESOURCE_GROUP"
     echo -e "${GREEN}✓ Will reuse existing Purview account: ${PURVIEW_ACCOUNT_NAME}${NC}"
 else
     echo -e "${YELLOW}A new Purview account will be created${NC}"

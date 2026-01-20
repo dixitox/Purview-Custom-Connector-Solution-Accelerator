@@ -175,15 +175,44 @@ az resource list --resource-group <your-resource-group> --output table
 ✅ Storage folders (`/incoming`, `/processed`)  
 ✅ Role assignments (Purview Data Curator & Reader)
 
-### Step 7: Configure Microsoft Fabric Workspace (15 minutes)
+### Step 7: Configure Microsoft Fabric Workspace (10 minutes)
 
-**Manual steps required** (Fabric workspace cannot be automated):
+**Manual steps required** (Fabric workspace creation cannot be automated):
 
+#### 7.1 Create Fabric Workspace
 1. Go to [Microsoft Fabric Portal](https://app.fabric.microsoft.com)
-2. Create new workspace with Fabric capacity or trial
-3. Import notebooks from `purview_connector_services/Fabric/notebook/`
-4. Import pipelines from `purview_connector_services/Fabric/pipeline/`
-5. Create connections to your Storage Account and Purview Account
+2. Create a new workspace with Fabric capacity or trial license
+3. Note your workspace name
+
+#### 7.2 Import Core Notebook
+Import the main notebook that loads entities into Purview:
+
+**Required Notebook:**
+- Location: `purview_connector_services/Fabric/notebook/Purview_Load_Entity.ipynb`
+- Purpose: Core functionality to load custom entities/types into Purview
+
+**How to import:**
+1. In your Fabric workspace, click **+ New** → **Import notebook**
+2. Select `Purview_Load_Entity.ipynb`
+3. The notebook will be available to run
+
+#### 7.3 Configure Storage Connection
+1. In the notebook, update the storage account connection to: `pccsast6nvsfni5vtcj6` (or your deployed storage account name from Step 6)
+2. Grant your service principal **Storage Blob Data Contributor** role on the storage account
+
+> **Note**: Pipelines and triggers are **optional** and used only for automation. You can skip them initially and run the notebook manually for testing.
+
+#### 7.4 Example Notebooks (Optional - for Testing)
+The solution includes example notebooks for specific use cases:
+
+**SSIS Example Notebooks** (location: `examples/ssis/fabric/notebook/`):
+- `SSIS_Scan_Package.ipynb` - Scans SSIS packages
+- `SSISDB_Get_Params.ipynb` - Gets SSIS parameters
+
+**Tag Database Example Notebooks** (location: `examples/tag_db/fabric/notebook/`):
+- `Purview_TAG_DB_Scan.ipynb` - Scans tag database metadata
+
+Only import these if you plan to run the specific examples.
 
 ### Step 8: Configure Purview Root Collection (5 minutes)
 

@@ -14,6 +14,9 @@
     "purviewAccountName": {
       "value": "${PURVIEW_ACCOUNT_NAME=}"
     },
+    "purviewResourceGroup": {
+      "value": "${PURVIEW_RESOURCE_GROUP=}"
+    },
     "clientId": {
       "value": "${AZURE_CLIENT_ID}"
     },

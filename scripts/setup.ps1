@@ -7,9 +7,9 @@ function Write-Color {
     Write-Host $Text -ForegroundColor $Color
 }
 
-Write-Color "╔════════════════════════════════════════════════════════╗" Cyan
-Write-Color "║  Purview Custom Connector - Deployment Setup Helper  ║" Cyan
-Write-Color "╚════════════════════════════════════════════════════════╝" Cyan
+Write-Color "========================================================" Cyan
+Write-Color "  Purview Custom Connector - Deployment Setup Helper  " Cyan
+Write-Color "========================================================" Cyan
 Write-Host ""
 
 # Check if azd is installed
@@ -34,7 +34,7 @@ try {
     az login
 }
 
-Write-Color "✓ Prerequisites check passed" Green
+Write-Color "[OK] Prerequisites check passed" Green
 Write-Host ""
 
 # Initialize azd environment
@@ -59,7 +59,7 @@ if ($existingEnvs -match $ENV_NAME) {
     azd env new $ENV_NAME
 }
 
-Write-Color "✓ Environment '$ENV_NAME' selected" Green
+Write-Color "[OK] Environment '$ENV_NAME' selected" Green
 Write-Host ""
 
 # Check for existing Purview accounts
@@ -75,12 +75,42 @@ $purviewAccounts = $purviewAccountsRaw -join "`n"
 if ([string]::IsNullOrWhiteSpace($purviewAccounts)) {
     Write-Color "No existing Purview accounts found." Yellow
     $PURVIEW_ACCOUNT_NAME = ""
+    $PURVIEW_RESOURCE_GROUP = ""
 } else {
     Write-Color "Found existing Purview account(s):" Green
-    $purviewAccounts -split "`n" | Where-Object { $_ -and $_.Trim() } | ForEach-Object { $i = 1 } { Write-Host "$i. $_"; $i++ }
+    $accountArray = $purviewAccounts -split "`n" | Where-Object { $_ -and $_.Trim() }
+    $i = 1
+    foreach ($account in $accountArray) {
+        Write-Host "$i. $account"
+        $i++
+    }
     Write-Host ""
     Write-Color "Note: You can only have ONE Purview account per Azure tenant." Yellow
     $PURVIEW_ACCOUNT_NAME = Read-Host "Enter Purview account name to reuse (or press Enter to create new)"
+    
+    if (-not [string]::IsNullOrWhiteSpace($PURVIEW_ACCOUNT_NAME)) {
+        # Get the resource group of the existing Purview account
+        Write-Color "Detecting Purview account resource group..." Yellow
+        $ErrorActionPreference = 'SilentlyContinue'
+        $purviewRgRaw = az purview account show --name $PURVIEW_ACCOUNT_NAME --query "resourceGroup" -o tsv 2>&1 | Where-Object { $_ -notmatch '^WARNING:' -and $_ -notmatch '^ERROR:' }
+        $ErrorActionPreference = 'Continue'
+        
+        if (-not [string]::IsNullOrWhiteSpace($purviewRgRaw)) {
+            $PURVIEW_RESOURCE_GROUP = $purviewRgRaw.Trim()
+            Write-Color "[OK] Detected resource group: $PURVIEW_RESOURCE_GROUP" Green
+            $confirmRg = Read-Host "Is this correct? (y/n) [default: y]"
+            if ([string]::IsNullOrWhiteSpace($confirmRg)) { $confirmRg = "y" }
+            
+            if ($confirmRg -notmatch "^[Yy]") {
+                $PURVIEW_RESOURCE_GROUP = Read-Host "Enter the resource group name for the Purview account"
+            }
+        } else {
+            Write-Color "[WARNING] Could not auto-detect resource group" Yellow
+            $PURVIEW_RESOURCE_GROUP = Read-Host "Enter the resource group name where Purview account '$PURVIEW_ACCOUNT_NAME' is located"
+        }
+    } else {
+        $PURVIEW_RESOURCE_GROUP = ""
+    }
 }
 
 Write-Host ""
@@ -101,9 +131,9 @@ if ($createSP -match "^[Yy]") {
     $CLIENT_SECRET = $spOutput.password
     $TENANT_ID = $spOutput.tenant
     
-    Write-Color "✓ Service principal created" Green
+    Write-Color "[OK] Service principal created" Green
     Write-Color "Client ID: $CLIENT_ID" Cyan
-    Write-Color "⚠ Save the client secret securely - it won't be shown again!" Yellow
+    Write-Color "[WARNING] Save the client secret securely - it won't be shown again!" Yellow
 } else {
     $CLIENT_ID = Read-Host "Enter service principal Client ID (appId)"
     $CLIENT_SECRET = Read-Host "Enter service principal Client Secret (password)" -AsSecureString
@@ -140,18 +170,19 @@ azd env set BASE_NAME $BASE_NAME
 
 if (-not [string]::IsNullOrWhiteSpace($PURVIEW_ACCOUNT_NAME)) {
     azd env set PURVIEW_ACCOUNT_NAME $PURVIEW_ACCOUNT_NAME
-    Write-Color "✓ Will reuse existing Purview account: $PURVIEW_ACCOUNT_NAME" Green
+    azd env set PURVIEW_RESOURCE_GROUP $PURVIEW_RESOURCE_GROUP
+    Write-Color "[OK] Will reuse existing Purview account: $PURVIEW_ACCOUNT_NAME" Green
 } else {
     Write-Color "A new Purview account will be created" Yellow
 }
 
-Write-Color "✓ All environment variables set" Green
+Write-Color "[OK] All environment variables set" Green
 Write-Host ""
 
 # Summary
-Write-Color "╔════════════════════════════════════════════════════════╗" Cyan
-Write-Color "║                  Configuration Summary                 ║" Cyan
-Write-Color "╚════════════════════════════════════════════════════════╝" Cyan
+Write-Color "========================================================" Cyan
+Write-Color "                  Configuration Summary                 " Cyan
+Write-Color "========================================================" Cyan
 Write-Color "Environment:       $ENV_NAME" Green
 Write-Color "Service Principal: $SP_NAME" Green
 Write-Color "Resource Group:    $RESOURCE_GROUP" Green
@@ -180,7 +211,7 @@ if ($deployNow -match "^[Yy]") {
 }
 
 Write-Host ""
-Write-Color "✓ Setup complete!" Green
+Write-Color "[OK] Setup complete!" Green
 Write-Host ""
 Write-Host "Useful commands:"
 Write-Color "  azd up          - Deploy everything" Cyan

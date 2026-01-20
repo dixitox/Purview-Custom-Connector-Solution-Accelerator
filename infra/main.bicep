@@ -14,6 +14,9 @@ param resourceGroupName string = '${baseName}-rg'
 @description('Purview account name (if empty, will search for existing or generate)')
 param purviewAccountName string = ''
 
+@description('Resource group of existing Purview account (only needed if reusing)')
+param purviewResourceGroup string = ''
+
 @description('Service principal client ID')
 @secure()
 param clientId string
@@ -43,9 +46,8 @@ module coreResources './modules/core-resources.bicep' = {
     baseName: baseName
     uniqueSuffix: uniqueSuffix
     purviewAccountName: purviewAccountName
-    clientId: clientId
+    purviewResourceGroup: purviewResourceGroup
     clientSecret: clientSecret
-    clientName: clientName
   }
 }
 
