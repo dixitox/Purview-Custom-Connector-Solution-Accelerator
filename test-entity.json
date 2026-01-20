@@ -1,0 +1,8 @@
+{
+  "typeName": "DataSet",
+  "attributes": {
+    "name": "test-dataset-001",
+    "qualifiedName": "test://purview-connector/datasets/test-dataset-001",
+    "description": "Test dataset to verify Purview Custom Connector functionality"
+  }
+}

@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: purview-custom-connector
+metadata:
+  template: purview-custom-connector@0.0.1-beta
+
+services:
+  # This solution doesn't have traditional app services
+  # The services are infrastructure (Purview, Storage, Fabric)
+  # Post-deployment scripts will configure Fabric workspace
+
+hooks:
+  postprovision:
+    windows:
+      shell: pwsh
+      run: ./infra/hooks/postprovision.ps1
+      continueOnError: false
+    posix:
+      shell: sh
+      run: ./infra/hooks/postprovision.sh
+      continueOnError: false

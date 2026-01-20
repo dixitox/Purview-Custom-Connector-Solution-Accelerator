@@ -1,0 +1,842 @@
+{
+  "AF": {
+    "AFDatabase": {
+      "Name": "DB_Operational",
+      "Description": "Operational Database for monitoring Specific operational Area",
+      "AFExtendedProperty": [
+        {
+          "Name": "DefaultPIServer",
+          "Value": "name_of_the_pi_server"
+        },
+        {
+          "Name": "DefaultPIServerID",
+          "Value": "12345678910"
+        }
+      ],
+      "AFElement": {
+        "Name": "Company_name",
+        "Description": "Root Element",
+        "Template": "Root",
+        "IsAnnotated": "false",
+        "Modifier": "DOMAIN\\username_02",
+        "Comment": null,
+        "EffectiveDate": "1970-01-01T00:00:00Z",
+        "ObsoleteDate": "9999-12-31T23:59:59Z",
+        "AFElement": {
+          "Name": "Area01",
+          "Description": "Element Level 02",
+          "Template": "Product",
+          "IsAnnotated": "false",
+          "Modifier": "DOMAIN\\username_02",
+          "Comment": null,
+          "EffectiveDate": "1970-01-01T00:00:00Z",
+          "ObsoleteDate": "9999-12-31T23:59:59Z",
+          "AFElement": {
+            "Name": "Country",
+            "Description": "Element Level  3",
+            "Template": "Region",
+            "IsAnnotated": "false",
+            "Modifier": "DOMAIN\\username",
+            "Comment": null,
+            "EffectiveDate": "1970-01-01T00:00:00Z",
+            "ObsoleteDate": "9999-12-31T23:59:59Z",
+            "AFElement": {
+              "Name": "Location 01",
+              "Description": "Element Level 4",
+              "Template": "Business Unit",
+              "IsAnnotated": "false",
+              "Modifier": "DOMAIN\\USER_03",
+              "Comment": null,
+              "EffectiveDate": "1970-01-01T00:00:00Z",
+              "ObsoleteDate": "9999-12-31T23:59:59Z",
+              "AFAttribute": [
+                {
+                  "Name": "Attribute 01",
+                  "Description": null,
+                  "IsHidden": "false",
+                  "IsManualDataEntry": "false",
+                  "IsConfigurationItem": "false",
+                  "IsExcluded": "false",
+                  "Trait": null,
+                  "DefaultUOM": null,
+                  "DisplayDigits": "-5",
+                  "Type": "String",
+                  "TypeQualifier": null,
+                  "DataReference": null,
+                  "ConfigString": null
+                },
+                {
+                  "Name": "Attribute 02",
+                  "Description": null,
+                  "IsHidden": "false",
+                  "IsManualDataEntry": "false",
+                  "IsConfigurationItem": "false",
+                  "IsExcluded": "false",
+                  "Trait": null,
+                  "DefaultUOM": null,
+                  "DisplayDigits": "-5",
+                  "Type": "String",
+                  "TypeQualifier": null,
+                  "DataReference": "String Builder",
+                  "ConfigString": "%Element%&#xD;"
+                },
+                {
+                  "Name": "Attribute 02",
+                  "Description": null,
+                  "IsHidden": "false",
+                  "IsManualDataEntry": "false",
+                  "IsConfigurationItem": "false",
+                  "IsExcluded": "false",
+                  "Trait": null,
+                  "DefaultUOM": null,
+                  "DisplayDigits": "2",
+                  "Type": "Decimal",
+                  "TypeQualifier": null,
+                  "DataReference": null,
+                  "ConfigString": null
+                }
+              ],
+              "AFElement": {
+                "Name": "Sub Location 01",
+                "Description": null,
+                "Template": "Tamplate 03",
+                "IsAnnotated": "false",
+                "Modifier": "DOMAIN\\username",
+                "Comment": null,
+                "EffectiveDate": "1970-01-01T00:00:00Z",
+                "ObsoleteDate": "9999-12-31T23:59:59Z",
+                "AFElementCategoryRef": "Category Type 01",
+                "AFAttribute": [
+                  {
+                    "Name": "Alarme",
+                    "Description": null,
+                    "IsHidden": "false",
+                    "IsManualDataEntry": "false",
+                    "IsConfigurationItem": "false",
+                    "IsExcluded": "false",
+                    "Trait": null,
+                    "DefaultUOM": null,
+                    "DisplayDigits": "-5",
+                    "Type": "Double",
+                    "TypeQualifier": null,
+                    "Status": "Good",
+                    "Timestamp": "1970-01-01T00:00:00Z",
+                    "Value": "17",
+                    "DataReference": null,
+                    "ConfigString": null
+                  },
+                  {
+                    "Name": "Group",
+                    "Description": null,
+                    "IsHidden": "false",
+                    "IsManualDataEntry": "false",
+                    "IsConfigurationItem": "false",
+                    "IsExcluded": "false",
+                    "Trait": null,
+                    "DefaultUOM": null,
+                    "DisplayDigits": "-5",
+                    "Type": "AFEnumerationValue",
+                    "TypeQualifier": "EnumerationSets[Goup 01]",
+                    "Value": null,
+                    "DataReference": null,
+                    "ConfigString": null
+                  },
+                  {
+                    "Name": "Controller",
+                    "Description": null,
+                    "IsHidden": "false",
+                    "IsManualDataEntry": "false",
+                    "IsConfigurationItem": "false",
+                    "IsExcluded": "false",
+                    "Trait": null,
+                    "DefaultUOM": null,
+                    "DisplayDigits": "-5",
+                    "Type": "AFEnumerationValue",
+                    "TypeQualifier": "EnumerationSets[On/Off]",
+                    "Value": null,
+                    "DataReference": null,
+                    "ConfigString": null
+                  },
+                  {
+                    "Name": "Availibility Average",
+                    "Description": null,
+                    "IsHidden": "false",
+                    "IsManualDataEntry": "false",
+                    "IsConfigurationItem": "false",
+                    "IsExcluded": "false",
+                    "Trait": null,
+                    "DefaultUOM": "%",
+                    "DisplayDigits": "-5",
+                    "Type": "Double",
+                    "TypeQualifier": null,
+                    "DataReference": "PI Point",
+                    "ConfigString": "\\\\name_of_the_pi_server?server_id\\Location 03.Availibility Average?43257"
+                  },
+                  {
+                    "Name": "Count",
+                    "Description": null,
+                    "IsHidden": "false",
+                    "IsManualDataEntry": "false",
+                    "IsConfigurationItem": "false",
+                    "IsExcluded": "false",
+                    "Trait": null,
+                    "DefaultUOM": null,
+                    "DisplayDigits": "-5",
+                    "Type": "Double",
+                    "TypeQualifier": null,
+                    "Status": "Good",
+                    "Timestamp": "1970-01-01T00:00:00Z",
+                    "Value": "145",
+                    "DataReference": null,
+                    "ConfigString": null
+                  },
+                  {
+                    "Name": "Name",
+                    "Description": null,
+                    "IsHidden": "false",
+                    "IsManualDataEntry": "false",
+                    "IsConfigurationItem": "false",
+                    "IsExcluded": "false",
+                    "Trait": null,
+                    "DefaultUOM": null,
+                    "DisplayDigits": "-5",
+                    "Type": "String",
+                    "TypeQualifier": null,
+                    "DataReference": "String Builder",
+                    "ConfigString": "%Element%"
+                  }
+                ],
+                "AFElement": [
+                  {
+                    "Name": "Last Level 01",
+                    "Description": null,
+                    "Template": "Last Tamplate 03",
+                    "IsAnnotated": "false",
+                    "Modifier": "DOMAIN\\username",
+                    "Comment": null,
+                    "EffectiveDate": "1970-01-01T00:00:00Z",
+                    "ObsoleteDate": "9999-12-31T23:59:59Z",
+                    "AFAttribute": [
+                      {
+                        "Name": "Alarme",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "Status": "Good",
+                        "Timestamp": "1970-01-01T00:00:00Z",
+                        "Value": "17",
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Group",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "AFEnumerationValue",
+                        "TypeQualifier": "EnumerationSets[Goup 01]",
+                        "Value": null,
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Controller",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "AFEnumerationValue",
+                        "TypeQualifier": "EnumerationSets[On/Off]",
+                        "Value": null,
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Availibility Average",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": "%",
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "DataReference": "PI Point",
+                        "ConfigString": "\\\\name_of_the_pi_server?server_id\\Location 03.Availibility Average?43257"
+                      },
+                      {
+                        "Name": "Count",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "Status": "Good",
+                        "Timestamp": "1970-01-01T00:00:00Z",
+                        "Value": "145",
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Name",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "String",
+                        "TypeQualifier": null,
+                        "DataReference": "String Builder",
+                        "ConfigString": "%Element%"
+                      }
+                    ],
+                    "AFAnalysis": [
+                      {
+                        "Name": "Availibility Calc",
+                        "Description": null,
+                        "Template": "Availibility Calc",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "FrozenStatus",
+                        "Description": null,
+                        "Template": "FrozenStatus",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "HealthStatus",
+                        "Description": null,
+                        "Template": "HealthStatus",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "LastActualization",
+                        "Description": null,
+                        "Template": "LastActualization",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "Tag Bad Status",
+                        "Description": null,
+                        "Template": "Tag Bad Status",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "Value Filtered",
+                        "Description": null,
+                        "Template": "Value Filtered",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      }
+                    ]
+                  },
+                  {
+                    "Name": "Last Level 02",
+                    "Description": null,
+                    "Template": "Last Tamplate 03",
+                    "IsAnnotated": "false",
+                    "Modifier": "DOMAIN\\username",
+                    "Comment": null,
+                    "EffectiveDate": "1970-01-01T00:00:00Z",
+                    "ObsoleteDate": "9999-12-31T23:59:59Z",
+                    "AFAttribute": [
+                      {
+                        "Name": "Alarme",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "Status": "Good",
+                        "Timestamp": "1970-01-01T00:00:00Z",
+                        "Value": "17",
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Group",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "AFEnumerationValue",
+                        "TypeQualifier": "EnumerationSets[Goup 01]",
+                        "Value": null,
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Controller",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "AFEnumerationValue",
+                        "TypeQualifier": "EnumerationSets[On/Off]",
+                        "Value": null,
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Availibility Average",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": "%",
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "DataReference": "PI Point",
+                        "ConfigString": "\\\\name_of_the_pi_server?server_id\\Location 03.Availibility Average?43257"
+                      },
+                      {
+                        "Name": "Count",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "Status": "Good",
+                        "Timestamp": "1970-01-01T00:00:00Z",
+                        "Value": "145",
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Name",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "String",
+                        "TypeQualifier": null,
+                        "DataReference": "String Builder",
+                        "ConfigString": "%Element%"
+                      }
+                    ],
+                    "AFAnalysis": [
+                      {
+                        "Name": "Availibility Calc",
+                        "Description": null,
+                        "Template": "Availibility Calc",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "FrozenStatus",
+                        "Description": null,
+                        "Template": "FrozenStatus",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "HealthStatus",
+                        "Description": null,
+                        "Template": "HealthStatus",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "LastActualization",
+                        "Description": null,
+                        "Template": "LastActualization",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "Tag Bad Status",
+                        "Description": null,
+                        "Template": "Tag Bad Status",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "Value Filtered",
+                        "Description": null,
+                        "Template": "Value Filtered",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      }
+                    ]
+                  },
+                  {
+                    "Name": "Last Level 03",
+                    "Description": null,
+                    "Template": "Last Tamplate 03",
+                    "IsAnnotated": "false",
+                    "Modifier": "DOMAIN\\username",
+                    "Comment": null,
+                    "EffectiveDate": "1970-01-01T00:00:00Z",
+                    "ObsoleteDate": "9999-12-31T23:59:59Z",
+                    "AFAttribute": [
+                      {
+                        "Name": "Alarme",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "Status": "Good",
+                        "Timestamp": "1970-01-01T00:00:00Z",
+                        "Value": "17",
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Group",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "AFEnumerationValue",
+                        "TypeQualifier": "EnumerationSets[Goup 01]",
+                        "Value": null,
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Controller",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "AFEnumerationValue",
+                        "TypeQualifier": "EnumerationSets[On/Off]",
+                        "Value": null,
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Availibility Average",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": "%",
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "DataReference": "PI Point",
+                        "ConfigString": "\\\\name_of_the_pi_server?server_id\\Location 03.Availibility Average?43257"
+                      },
+                      {
+                        "Name": "Count",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "Double",
+                        "TypeQualifier": null,
+                        "Status": "Good",
+                        "Timestamp": "1970-01-01T00:00:00Z",
+                        "Value": "145",
+                        "DataReference": null,
+                        "ConfigString": null
+                      },
+                      {
+                        "Name": "Name",
+                        "Description": null,
+                        "IsHidden": "false",
+                        "IsManualDataEntry": "false",
+                        "IsConfigurationItem": "false",
+                        "IsExcluded": "false",
+                        "Trait": null,
+                        "DefaultUOM": null,
+                        "DisplayDigits": "-5",
+                        "Type": "String",
+                        "TypeQualifier": null,
+                        "DataReference": "String Builder",
+                        "ConfigString": "%Element%"
+                      }
+                    ],
+                    "AFAnalysis": [
+                      {
+                        "Name": "Availibility Calc",
+                        "Description": null,
+                        "Template": "Availibility Calc",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "FrozenStatus",
+                        "Description": null,
+                        "Template": "FrozenStatus",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "HealthStatus",
+                        "Description": null,
+                        "Template": "HealthStatus",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "LastActualization",
+                        "Description": null,
+                        "Template": "LastActualization",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "Tag Bad Status",
+                        "Description": null,
+                        "Template": "Tag Bad Status",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      },
+                      {
+                        "Name": "Value Filtered",
+                        "Description": null,
+                        "Template": "Value Filtered",
+                        "CaseTemplate": null,
+                        "OutputTime": null,
+                        "Status": "Enabled",
+                        "PublishResults": "false",
+                        "Priority": "High",
+                        "MaxQueueSize": "0",
+                        "GroupID": "0",
+                        "Target": {
+                          "AFElementRef": "Company_name\\Area01\\Country\\Location 02\\Location 03\\Element 01"
+                        },
+                        "SecurityAccessControl": "Administrators:A(r,w,rd,wd,d,x,a,s,so,an)|Engineers:A(r,w,rd,wd,d,x,s,so,an)|World:A(r,rd)|Asset Analytics:A(r,w,rd,wd,x,an)|Asset Analytics Recalculation:A(x)|Notifications:A(r,w,rd,wd,an)|PIVisionService:A(r,w,rd,wd,d,x,a,s,so,an)|RTQP Engine:A(r,rd)|TECHNOLOGY-ADMINISTRATOR:A(r,w,rd,wd,d,x,a,s,so,an)|APPLICATION-GEOTECDATAGATHERING:A(r,w,rd,wd,d,x,a,s,so,an)|GEOTECHNICS-BASICOPERATOR:A(r,rd)|GEOTECHNICS-NORMATIVE:A(r,w,rd,wd,d,x,a,s,so,an)|TECHNOLOGY-BASICOPERATOR:A(r,rd)"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

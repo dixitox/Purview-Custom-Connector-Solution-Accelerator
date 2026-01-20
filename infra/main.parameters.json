@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "${AZURE_LOCATION=eastus}"
+    },
+    "baseName": {
+      "value": "${BASE_NAME=pccsa}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP}"
+    },
+    "purviewAccountName": {
+      "value": "${PURVIEW_ACCOUNT_NAME=}"
+    },
+    "purviewResourceGroup": {
+      "value": "${PURVIEW_RESOURCE_GROUP=}"
+    },
+    "clientId": {
+      "value": "${AZURE_CLIENT_ID}"
+    },
+    "clientSecret": {
+      "value": "${AZURE_CLIENT_SECRET}"
+    },
+    "clientName": {
+      "value": "${AZURE_CLIENT_NAME=PurviewCustomConnectorSP}"
+    }
+  }
+}

@@ -31,26 +31,197 @@ The TAG DB module was design following the hierarchical structure of the tags it
 
 ### Prerequisites
 
-To use this custom connector you will need to deploy the complete 'Purview Custom Connector Solution Accelerator' and 'Purview-Custom-Types-Tool-Solution-Accelerator-main' that will allow you to create the Entity definition for TAG DB, also you will need a process that exports TAG DB metadata xml file.
+1. Deploy the 'Purview Custom Connector Solution Accelerator' - [Deploy Solution](../../README.md#deployment)
+2. Install the 'Purview Custom Types Tool' - [Download](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator/releases)
+3. Have TAG DB metadata exported as XML files
 
-### Step 1. Configure Pipeline Parameters
+### Step 1: Create Storage Folders
 
-1. Deploy the 'Purview Custom Connector Solution Accelerator'. [Deploy Solution](../../purview_connector_services/deploy/deploy_sa.md)
-2. Deploy the 'Purview Custom Types Tool Solution Accelerator' [Deploy Solution](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator)
-3. Deploy the 'TAG DB Connector'. [Deploy Solution](deploy/deploy_tag_db.md)
+Create the following folders in your storage account container (e.g., `pccsa`):
 
-### 2. Configure Development Environment
+```bash
+# Using Azure CLI
+az storage fs directory create --name tag-db-xml --file-system pccsa --account-name <your-storage-account> --auth-mode login
+az storage fs directory create --name tag-db-json --file-system pccsa --account-name <your-storage-account> --auth-mode login
+az storage fs directory create --name tag-db-purview-json --file-system pccsa --account-name <your-storage-account> --auth-mode login
+az storage fs directory create --name tag-db-processed --file-system pccsa --account-name <your-storage-account> --auth-mode login
+```
 
-1.Folder structure:
+**Folder Structure and Purpose:**
 
-<!--![TAG DB Folder Structure](../../docs/images/tag_db_folder_structure.svg)-->
+- `tag-db-xml/` - Source XML files exported from TAG DB
+- `tag-db-json/` - Converted JSON files (intermediate format for scanner)
+- `tag-db-purview-json/` - Purview-ready entity JSON (scanner output)
+- `tag-db-processed/` - Archive of processed files
 
-    1.1 'tag-db-xml' - Location of the xml file exported from the TAG DB that will be used to load the tag db metadata into Microsoft Purview
-    1.2 'tag-db-json' - Location where will be generated the conversion of the xml into a json format to be used to load meta data into Microsoft Purview
-    1.3 'tag-db-purview-json' - Location where the 'TAG DB Scanner' generate the json file to be loaded int o operview
-    1.4 'tag-db-proccessed' - Loacation where all files processed by 'TAG DB Scanner' will put all files processed by the solution. 
+### Step 2: Convert XML to JSON
 
-### Create types in Purview
+TAG DB exports metadata as XML, but the scanner requires JSON format. Convert your XML files:
+
+**Option A: Using Python Script (for testing)**
+
+```bash
+# Install required package
+pip install xmltodict
+
+# Run the conversion script
+python examples/tag_db/convert_xml_to_json.py
+```
+
+**Option B: Using Fabric Pipeline (for production)**
+
+Import and configure the `Convert TAG DB XML Metadata to Json` pipeline from `examples/tag_db/fabric/pipeline/`.
+
+**Upload converted JSON to storage:**
+
+```bash
+az storage blob upload --account-name <storage-account> --container-name pccsa \
+  --name tag-db-json/your-file.json --file converted-file.json --auth-mode login
+``` 
+
+### Step 3: Create Custom Entity Types in Purview
+
+For general Atlas type information, review the resource list in [README.MD](../../README.MD#purview-development-resources).
+
+1. **Launch Purview Custom Types Tool** and connect to your Purview account
+2. **Create New Service Type**: Name it `TAG_DB` or `osi_pi`
+
+Create the following entity types in order:
+
+#### Entity Type 1: afdatabase
+- **Category**: Entity
+- **Super Type**: Asset
+- **Name**: `afdatabase`
+- **Attributes**:
+  - `DefaultPIServer` (string, required, unique)
+  - `DefaultPIServerID` (string, required, unique)
+
+#### Entity Type 2: afelement
+- **Category**: Entity
+- **Super Type**: Asset  
+- **Name**: `afelement`
+- **Attributes**:
+  - `Template` (string, optional, unique)
+  - `IsAnnotated` (int, optional, unique)
+  - `Modifier` (string, optional, unique)
+  - `Comment` (string, optional, unique)
+  - `EffectiveDate` (string, optional, unique)
+  - `ObsoleteDate` (date, optional, unique)
+
+#### Entity Type 3: afattribute
+- **Category**: Entity
+- **Super Type**: Asset
+- **Name**: `afattribute`
+- **Attributes**: 13 attributes (see [tag_db_type_def.json](meta_model/tag_db_type_def.json) for complete list)
+
+#### Entity Type 4: afanalysis
+- **Category**: Entity
+- **Super Type**: Asset
+- **Name**: `afanalysis`
+- **Attributes**: 8 attributes (see [tag_db_type_def.json](meta_model/tag_db_type_def.json) for complete list)
+
+#### Relationship Types
+
+Create these composition relationships:
+
+1. **afdatabase_afelement**: Links AFDatabase to AFElements
+2. **afelement_afelement**: Parent-child AFElement hierarchy
+3. **afelement_afattribute**: Links AFElement to AFAttributes
+4. **afelement_afanalysis**: Links AFElement to AFAnalyses
+
+**Save all types to Azure** before proceeding.
+
+### Step 4: Configure and Run TAG DB Scanner Notebook
+
+1. **Import notebook** to Fabric workspace: `examples/tag_db/fabric/notebook/Purview_TAG_DB_Scan.ipynb`
+
+2. **Update Cell 2 configuration**:
+
+```python
+# Storage Configuration
+blob_container_name = "pccsa"  # Your container name
+blob_account_name = "your-storage-account"
+blob_relative_path = "tag-db-json"  # Reads JSON files (not XML)
+blob_processed = "tag-db-processed"
+out_file = "tag-db-purview-json"
+
+# Purview Configuration  
+app_name = "your-service-principal-name"
+key_vault_uri = "https://your-keyvault.vault.azure.net/"
+purview_account_name = "your-purview-account"
+```
+
+3. **Run the notebook** - it will:
+   - Read JSON files from `tag-db-json/`
+   - Parse TAG DB hierarchy
+   - Generate Purview entity JSON in `tag-db-purview-json/`
+   - Move processed files to `tag-db-processed/`
+
+### Step 5: Load Entities into Purview
+
+**Option A: Copy to incoming folder**
+
+```bash
+# Copy TAG DB output to incoming folder
+az storage blob copy start --account-name <storage> --destination-container pccsa \
+  --destination-blob incoming/tagdb-entities.json \
+  --source-container pccsa --source-blob tag-db-purview-json/<output-file>.json \
+  --auth-mode login
+```
+
+Then run the main **Purview_Load_Entity** notebook.
+
+**Option B: Create dedicated loader notebook**
+
+Duplicate `Purview_Load_Entity` and update Cell 2:
+```python
+storage_path = "tag-db-purview-json"  # Read from TAG DB output
+processed_path = "tag-db-json"         # Archive location
+```
+
+### Step 6: Verify in Purview
+
+1. Open [Microsoft Purview Governance Portal](https://web.purview.azure.com/)
+2. Navigate to **Data Catalog** → **Browse** or **Search**
+3. Search for: `osipi://` or your database name (e.g., `DB_Operational`)
+4. Verify the hierarchical structure:
+   - AFDatabase entities
+   - Nested AFElement hierarchy
+   - AFAttribute and AFAnalysis relationships
+
+## Quick Start with Sample Data
+
+To test with the provided sample:
+
+```bash
+# 1. Upload sample XML
+az storage blob upload --account-name <storage> --container-name pccsa \
+  --name tag-db-xml/tag-db-xml-sample.xml \
+  --file examples/tag_db/example_data/tag-db-xml-sample.xml --auth-mode login
+
+# 2. Convert to JSON
+python examples/tag_db/convert_xml_to_json.py
+
+# 3. Upload JSON
+az storage blob upload --account-name <storage> --container-name pccsa \
+  --name tag-db-json/tag-db-xml-sample.json \
+  --file examples/tag_db/example_data/tag-db-xml-sample.json --auth-mode login
+
+# 4. Run TAG DB Scanner notebook in Fabric
+# 5. Run Purview_Load_Entity notebook in Fabric
+# 6. Verify in Purview portal
+```
+
+## Production Deployment
+
+For production use:
+
+1. **Automate XML to JSON conversion** using the Fabric pipeline
+2. **Schedule the TAG DB Scanner** notebook to run periodically
+3. **Set up event-driven triggers** to process new files automatically
+4. **Monitor processing** through Fabric monitoring tools
+
+### Create types in Purview (DEPRECATED - See Step 3 above)
 
 For general Atlas type information review the resource list in [README.MD](../../README.MD#purview-development-resources)
 

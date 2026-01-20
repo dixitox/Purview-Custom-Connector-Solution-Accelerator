@@ -18,7 +18,7 @@ Follow the instructions for deploying the base solution under [purview_connector
 ## Reference - script actions
 
 * Sets up the blob storage directory structure for the Tag DB example
-* In Synapse
+* In Microsoft Fabric Workspace
   * Imports dataset definitions
   * Imports the notebook
   * Imports the pipeline definitions

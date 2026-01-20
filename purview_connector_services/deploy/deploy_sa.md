@@ -1,55 +1,128 @@
-# Deployment of the Purview Custom Connector Solution Accelerator Base Services
+# Deployment of the Purview Custom Connector Solution Accelerator
+
+> **⚠️ NOTICE**: This deployment method has been replaced with Azure Developer CLI (azd).
+> 
+> **👉 Please use the new deployment method**: See [../../README.md](../../README.md) for updated instructions.
+>
+> The new deployment offers:
+> - ✅ Idempotent deployments (run multiple times safely)
+> - ✅ Custom resource group names
+> - ✅ Reuse existing Purview accounts
+> - ✅ Better tooling and automation
+>
+> Legacy files have been moved to the `legacy/` folder for reference.
+
+---
+
+## Legacy Deployment Documentation
+
+The original bash script deployment (`deploy_sa.sh`) and ARM templates are preserved in the `legacy/` folder.
+
+For the new recommended deployment approach, see the [main README](../../README.md).
+
+### Quick Start with New Deployment
+
+1. Install [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
+2. Run the interactive setup script:
+   ```powershell
+   # Windows
+   .\scripts\setup.ps1
+   
+   # Mac/Linux  
+   ./scripts/setup.sh
+   ```
+
+---
+
+## Original Documentation (Legacy)
+
+**Note**: The following documentation describes the legacy deployment process. It is kept for reference only.
 
 ## Services Installed
   
   ![deployed services / changes](../../assets/images/service_deploy_block.svg)
 
+## Prerequisites
+
+- Azure CLI installed locally ([Download](https://docs.microsoft.com/cli/azure/install-azure-cli))
+- Git installed
+- Bash shell (Git Bash on Windows, native on Mac/Linux)
+- Azure subscription with Contributor and User Access Administrator permissions
+
 ## Deployment Steps
 
 ### Create an application identity and corresponding secret
 
- This will be the identity used for access to the Purview workspace from the Custom Type Tool application and from the synapse connector services. See [Create a service principal](https://docs.microsoft.com/en-us/azure/purview/tutorial-using-rest-apis#create-a-service-principal-application)
-
-### Clone the repository into Azure cloud shell
-
-* Start the cloud CLI in bash mode
-* cd to the cloud storage directory (clouddrive)
-* clone this repository into the clouddrive directory
+This will be the identity used for access to the Purview workspace from the Custom Type Tool application and from the Fabric connector services. See [Create a service principal](https://docs.microsoft.com/en-us/azure/purview/tutorial-using-rest-apis#create-a-service-principal-application)
 
 ```bash
-git clone https://github.com/microsoft/Purview-Custom-Connector-Solution-Accelerator.git
+az login
+az ad sp create-for-rbac --name "PurviewCustomConnectorSP" --role Contributor
+```
 
-```  
+**Save the output values** (appId, password, tenant)
+
+### Clone the repository locally
+
+```bash
+# Clone to your local machine
+git clone https://github.com/microsoft/Purview-Custom-Connector-Solution-Accelerator.git
+cd Purview-Custom-Connector-Solution-Accelerator/purview_connector_services/deploy
+```
 
 ### Configure application settings file
 
-* Download the settings.sh.rename file from the Purview-Custom-Connector-Solution-Accelerator/purview_connector_services/deploy directory
-* Modify the file as indicated to include a setup location, App name, client id, and secret
-* Rename the file to settings.sh
+1. Copy `settings.sh.rename` to `settings.sh`
+2. Edit `settings.sh` with your values:
 
-### Upload the application settings
-
-* Upload the settings.sh file (created above) to the deploy directory using the Upload/Download files tool
-
-  ![upload files](../../assets/images/upload_with_cloud_console.png)
-
-* Choose the "Manage file share" option, navigate to the Purview-Custom-Connector-Solution-Accelerator/purview_connector_services/deploy directory and copy the settings.sh file into this directory
-
-  ![cloud console directory](../../assets/images/upload_file_to_cloud_console_directory.png)
-
-  ![upload file dialog](../../assets/images/upload_file_dialog.png)
+```bash
+#!/bin/bash
+location="eastus"  # or your preferred region
+client_name="PurviewCustomConnectorSP"
+client_id="<YOUR_APP_ID>"
+client_secret="<YOUR_CLIENT_SECRET>"
+```
 
 ### Run the deployment script
 
-* Navigate to the Purview-Custom-Connector-Solution-Accelerator/purview_connector_services/deploy directory
-* Run the deploy_sa.sh script
+**From VS Code Terminal (or any bash terminal):**
 
 ```bash
-./deploy_sa.sh
+# Navigate to deploy directory
+cd purview_connector_services/deploy
 
+# Make executable (Mac/Linux)
+chmod +x deploy_sa.sh
+
+# Run deployment
+./deploy_sa.sh
 ```
 
+**From Windows (Git Bash):**
+
+```bash
+# Open Git Bash
+cd /c/path/to/Purview-Custom-Connector-Solution-Accelerator/purview_connector_services/deploy
+bash deploy_sa.sh
+```
+
+The script will run for approximately 30-45 minutes.
+
   For details about the scripts functionality, see [Reference - script actions](#reference---script-actions)
+
+### Save deployment output
+
+After deployment completes, save the resource names:
+
+```bash
+cat export_names.sh
+```
+
+These values will be needed for Fabric configuration.
+
+### Configure Microsoft Fabric (Manual Steps)
+
+⚠️ **Note:** Fabric workspace, notebooks, and pipelines must be configured manually via the Fabric portal or REST API. See the [Quick Start](#quick-start) in README.md for steps.
 
 ### [Configure your Purview catalog to trust the service principal](https://docs.microsoft.com/en-us/azure/purview/tutorial-using-rest-apis#configure-your-catalog-to-trust-the-service-principal-application)
 
@@ -83,9 +156,9 @@ git clone https://github.com/microsoft/Purview-Custom-Connector-Solution-Acceler
   * Save secret URL
 * Deploy Purview
   * Add app sp to purview roles
-* Deploy Synapse
-  * Add Synapse to storage roles
-  * Add Synapse to retrieve KeyVault secrets
+* Deploy Microsoft Fabric Workspace
+  * Add Fabric workspace to storage roles
+  * Add Fabric workspace to retrieve KeyVault secrets
   * Create linked service to storage
   * Create spark pool
   * Add package dependencies (PyApacheAtlas)
