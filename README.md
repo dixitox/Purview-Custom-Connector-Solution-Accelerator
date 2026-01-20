@@ -11,6 +11,8 @@ products:
 
 # Purview Custom Connector Solution Accelerator
 
+> **Note**: This repository is based on the [Microsoft Purview Custom Connector Solution Accelerator](https://github.com/microsoft/Purview-Custom-Connector-Solution-Accelerator) and has been enhanced with Microsoft Fabric integration and modernized deployment using Azure Developer CLI (azd).
+
 ## 📋 Table of Contents
 - [Quick Start](#-quick-start---3-easy-steps) - Deploy in 15 minutes
 - [Step-by-Step Deployment](#deployment---step-by-step) - Detailed instructions
@@ -246,17 +248,65 @@ Your deployment is complete. You now have:
 
 ### Run the Examples
 
-This accelerator includes two working examples:
+This accelerator includes two working examples that demonstrate end-to-end workflows:
 
-**1. SSIS Package Lineage Example**
-- Location: `examples/ssis/`
-- Shows how to capture SSIS package execution lineage
-- See [examples/ssis/ssis.md](examples/ssis/ssis.md)
+#### **1. TAG Database (OSI PI) Scanner** 🏭
 
-**2. Tag Database Example**
-- Location: `examples/tag_db/`
-- Shows how to scan custom metadata from XML files
-- See [examples/tag_db/tag_db.md](examples/tag_db/tag_db.md)
+Scan hierarchical TAG DB (OSI PI) metadata into Purview.
+
+- **Location**: `examples/tag_db/`
+- **What it does**: 
+  - Converts TAG DB XML exports to Purview entities
+  - Maintains hierarchical AFDatabase → AFElement → AFAttribute relationships
+  - Loads operational metadata into Purview catalog
+- **Quick Start**: [examples/tag_db/tag_db.md](examples/tag_db/tag_db.md)
+- **Time to complete**: ~30 minutes
+- **Prerequisites**: 
+  - Purview Custom Types Tool (to create afdatabase, afelement types)
+  - TAG DB XML export file
+
+**Key Files**:
+- `convert_xml_to_json.py` - Converts XML to JSON format
+- `Purview_TAG_DB_Scan.ipynb` - Fabric notebook to process metadata
+- `tag_db_type_def.json` - Custom entity type definitions
+
+---
+
+#### **2. SSIS Package Lineage** 📊
+
+Capture SSIS package execution lineage and load into Purview.
+
+- **Location**: `examples/ssis/`
+- **What it does**:
+  - Extracts SSIS package metadata
+  - Tracks data lineage through transformations
+  - Links source → transformation → destination
+- **Documentation**: [examples/ssis/ssis.md](examples/ssis/ssis.md)
+- **Time to complete**: ~45 minutes
+- **Prerequisites**:
+  - SSIS packages deployed to SQL Server or Azure-SSIS IR
+  - Purview Custom Types Tool (to create SSIS entity types)
+
+---
+
+### Test Your Deployment
+
+After deployment, verify everything works:
+
+1. **Test the Core Loader**:
+   - Upload `test-entity.json` to `incoming/` folder
+   - Run `Purview_Load_Entity` notebook in Fabric
+   - Verify entity appears in Purview
+
+2. **Try the TAG DB Example**:
+   - Follow [Quick Start guide](examples/tag_db/tag_db.md#quick-start-with-sample-data)
+   - Process sample TAG DB metadata
+   - View hierarchical entities in Purview
+
+3. **Explore SSIS Example**:
+   - Review [SSIS documentation](examples/ssis/ssis.md)
+   - Set up SSIS metadata extraction
+   - Visualize lineage in Purview
 
 ### Updating Your Deployment
 
@@ -278,6 +328,7 @@ azd env new prod
 # Switch between them
 azd env select dev
 azd env select test
+```
 ```
 
 ### Cleaning Up

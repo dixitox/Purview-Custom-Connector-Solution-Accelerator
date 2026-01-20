@@ -1,6 +1,18 @@
 #!/usr/bin/env python3
 """
-Quick script to convert TAG DB XML to JSON format for testing
+TAG DB XML to JSON Converter
+
+Converts TAG DB XML exports to JSON format for processing by the Purview_TAG_DB_Scan notebook.
+
+Usage:
+    python examples/tag_db/convert_xml_to_json.py
+
+Requirements:
+    pip install xmltodict
+
+The script reads the sample XML file and outputs a JSON file in the same directory.
+For production use, consider using the Fabric pipeline instead:
+    examples/tag_db/fabric/pipeline/Converte TAG DB XML Metadata to Json.json
 """
 import json
 import xmltodict
