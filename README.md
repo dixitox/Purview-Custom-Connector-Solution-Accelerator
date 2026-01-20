@@ -11,22 +11,9 @@ products:
 
 # Purview Custom Connector Solution Accelerator
 
-> **🎯 New to this solution?** Start with the [Pre-Flight Checklist](PREFLIGHT_CHECKLIST.md) then follow the [Quick Start Guide](QUICK_START.md) for a streamlined 3-4 hour implementation.
-
 Microsoft Purview is a unified data governance service that helps you manage and govern your on-premises, multi-cloud, and software-as-a-service (SaaS) data. Microsoft Purview Data Map provides the foundation for data discovery and effective data governance, however, no solution can support scanning metadata for all existing data sources or lineage for every ETL tool or process that exists today. That is why Purview was built for extensibility using the open Apache Atlas API set. This API set allows customers to develop their own scanning capabilities for data sources or ETL tools which are not yet supported out of the box. This Solution Accelerator is designed to jump start the development process and provide patterns and reusable tooling to help accelerate the creation of Custom Connectors for Microsoft Purview.
 
 The accelerator includes documentation, resources and examples to inform about the custom connector development process, tools, and APIs. It further works with utilities to make it easier to create a meta-model for your connector (Purview Custom Types Tool) with examples including ETL tool lineage as well as a custom data source. It includes infrastructure / architecture to support scanning of on-prem and complex data sources using Microsoft Fabric Spark for compute and Fabric Data Pipelines for orchestration.
-
-## 📚 Documentation Quick Links
-
-| Document | Purpose | Time |
-|----------|---------|------|
-| [Pre-Flight Checklist](PREFLIGHT_CHECKLIST.md) | Verify you have everything before starting | 10 min |
-| [Quick Start Guide](QUICK_START.md) | Fastest path to a working deployment | 3-4 hours |
-| [Implementation Guide](IMPLEMENTATION_GUIDE.md) | Detailed step-by-step instructions | Reference |
-| [Implementation Flow](IMPLEMENTATION_FLOW.md) | Visual diagrams and data flow | Reference |
-| [Fabric Migration Notes](FABRIC_MIGRATION_NOTES.md) | Synapse to Fabric migration details | Reference |
-| [Troubleshooting](Troubleshooting.md) | Common issues and solutions | As needed |
 
 ## Applicability
 
@@ -37,6 +24,111 @@ The examples provided demonstrate how the design and services can be used to acc
 ## Prerequisites
 
 - This solution accelerator is designed to be combined with the [Purview Custom Types Tool SA](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator). Installation of this accelerator is required to run the examples in this accelerator.
+- Azure Subscription with Contributor and User Access Administrator permissions
+- [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) installed locally
+- Microsoft Fabric capacity or trial license
+- Visual Studio Code (recommended for local development)
+
+## Quick Start
+
+### 1. Create Service Principal (5 minutes)
+
+```bash
+# Login to Azure
+az login
+
+# Create service principal
+az ad sp create-for-rbac --name "PurviewCustomConnectorSP" --role Contributor
+
+# Save the output values:
+# - appId (CLIENT_ID)
+# - password (CLIENT_SECRET)  
+# - tenant (TENANT_ID)
+```
+
+### 2. Configure Settings (2 minutes)
+
+1. Navigate to `purview_connector_services/deploy/`
+2. Copy `settings.sh.rename` to `settings.sh`
+3. Edit with your values:
+
+```bash
+#!/bin/bash
+location="eastus"  # Choose your Azure region
+client_name="PurviewCustomConnectorSP"
+client_id="<YOUR_APP_ID>"
+client_secret="<YOUR_CLIENT_SECRET>"
+```
+
+### 3. Deploy Azure Resources (45 minutes)
+
+```bash
+# From VS Code terminal or local bash shell
+cd purview_connector_services/deploy
+
+# Make script executable (Linux/Mac)
+chmod +x deploy_sa.sh
+
+# Run deployment
+./deploy_sa.sh
+
+# After completion, save the resource names
+cat export_names.sh
+```
+
+**What gets deployed:**
+- Microsoft Purview Account
+- Azure Storage Account (ADLS Gen2)
+- Azure Key Vault
+- Folder structure in storage
+
+### 4. Create Fabric Workspace (15 minutes)
+
+1. Go to [Microsoft Fabric Portal](https://app.fabric.microsoft.com)
+2. Create new workspace with Fabric capacity or trial
+3. Create a Lakehouse in the workspace
+4. Add ADLS shortcut to your storage account (path: `/pccsa`)
+5. Create Spark Environment with `pyapacheatlas` package
+
+### 5. Configure Purview (10 minutes)
+
+1. Go to [Purview Studio](https://web.purview.azure.com)
+2. Navigate to your Purview account → Data Map → Collections → Root collection
+3. Add your service principal to **Data Curators** and **Data Readers** roles
+4. Install [Purview Custom Types Tool](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator)
+5. Create entity type: `purview_custom_connector_generic_entity` (DataSet supertype)
+
+### 6. Import Notebooks and Pipelines (20 minutes)
+
+**Import Notebooks:**
+1. In Fabric workspace, import notebooks from `purview_connector_services/Fabric/notebook/`
+2. Attach to your Spark environment and Lakehouse
+
+**Create Pipeline:**
+1. Create new Data Pipeline: `Purview Load Custom Types`
+2. Add Web activity to get secret from Key Vault
+3. Add Notebook activity to run `Purview_Load_Entity` with parameters
+4. Configure pipeline with values from `export_names.sh`
+
+### 7. Test (5 minutes)
+
+Upload test JSON to `<storage>/pccsa/pccsa_main/incoming/`:
+
+```json
+{
+  "typeName": "purview_custom_connector_generic_entity",
+  "attributes": {
+    "qualifiedName": "test://my-entity",
+    "name": "Test Entity"
+  }
+}
+```
+
+Run pipeline and verify entity in Purview Data Catalog.
+
+**Total time:** ~2 hours
+
+---
 
 ## Solution Overview
 
@@ -80,28 +172,11 @@ Using Fabric Data Pipelines and Spark pools for connector development offers a n
 
 ## Getting Started
 
-### 🚀 Quick Start (Recommended)
+Follow the [Quick Start](#quick-start) steps above to deploy the base solution.
 
-**New to this solution?** Start here for a streamlined implementation:
-- **[Quick Start Guide](QUICK_START.md)** - Get up and running in 3-4 hours
-- **[Detailed Implementation Guide](IMPLEMENTATION_GUIDE.md)** - Comprehensive step-by-step instructions
-- **[Fabric Migration Notes](FABRIC_MIGRATION_NOTES.md)** - Important notes about the Fabric migration
+### Deploy Examples (Optional)
 
-### Deploy Resources / Configuration
-
-#### Deploy Base Services
-
-Instructions for deploying the base connector services, which includes deployment of Microsoft Fabric workspace, Purview, and Fabric notebooks and pipelines for ingesting custom types into Purview can be found in the [Base Services Deployment Doc](./purview_connector_services/deploy/deploy_sa.md)
-
-**Note:** Microsoft Fabric requires some manual configuration steps. See the [Implementation Guide](IMPLEMENTATION_GUIDE.md) for detailed instructions.
-
-#### Deploy the Purview Custom Types Tool
-
-To setup and run the example connectors, you will need to install the [Purview Custom Type Tool](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator). This should be done after the creation of the Application Security Principle and the Purview instance it will connect to (as part of Base Service deployment). The security principle information and Purview instance are required to initialize the tool.
-
-#### Deploy Examples
-
-Deploying the example connectors requires running a script from the Cloud Command Shell, along with some manual steps for the more involved SSIS example.  Detailed steps can be found in the following documents:
+After base deployment, you can deploy examples:
 * [ETL Tool Lineage (SSIS) Example Deployment](./examples/ssis/deploy/deploy_ssis.md)
 * [Data Source (Tag DB) Example Deployment](./examples/tag_db/deploy/deploy_tag_db.md)
 
