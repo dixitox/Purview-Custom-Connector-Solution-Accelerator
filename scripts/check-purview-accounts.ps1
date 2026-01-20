@@ -25,10 +25,20 @@ Write-Host "$SUBSCRIPTION_NAME ($SUBSCRIPTION_ID)" -ForegroundColor $GREEN
 
 # Search for existing Purview accounts
 Write-Host "`nSearching for Purview accounts in subscription..." -ForegroundColor $YELLOW
-$PURVIEW_ACCOUNTS_JSON = az purview account list --query "[].{Name:name, ResourceGroup:resourceGroup, Location:location}" -o json
 
-$PURVIEW_ACCOUNTS = $PURVIEW_ACCOUNTS_JSON | ConvertFrom-Json
-$ACCOUNT_COUNT = $PURVIEW_ACCOUNTS.Count
+# Suppress warnings and errors, get only the valid JSON output
+$ErrorActionPreference = 'SilentlyContinue'
+$purviewAccountsRaw = az purview account list --query "[].{Name:name, ResourceGroup:resourceGroup, Location:location}" -o json 2>&1 | Where-Object { $_ -notmatch '^WARNING:' -and $_ -notmatch '^ERROR:' }
+$ErrorActionPreference = 'Continue'
+
+try {
+    $PURVIEW_ACCOUNTS = ($purviewAccountsRaw -join "`n") | ConvertFrom-Json
+    $ACCOUNT_COUNT = @($PURVIEW_ACCOUNTS).Count
+} catch {
+    Write-Host "Unable to query Purview accounts. The Purview CLI extension may not be installed." -ForegroundColor $YELLOW
+    Write-Host "You can create a new Purview account during deployment." -ForegroundColor $GREEN
+    exit 0
+}
 
 if ($ACCOUNT_COUNT -eq 0) {
     Write-Host "No existing Purview accounts found." -ForegroundColor $YELLOW

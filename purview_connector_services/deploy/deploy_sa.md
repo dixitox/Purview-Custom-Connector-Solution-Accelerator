@@ -1,4 +1,42 @@
-# Deployment of the Purview Custom Connector Solution Accelerator Base Services
+# Deployment of the Purview Custom Connector Solution Accelerator
+
+> **⚠️ NOTICE**: This deployment method has been replaced with Azure Developer CLI (azd).
+> 
+> **👉 Please use the new deployment method**: See [../../README.md](../../README.md) for updated instructions.
+>
+> The new deployment offers:
+> - ✅ Idempotent deployments (run multiple times safely)
+> - ✅ Custom resource group names
+> - ✅ Reuse existing Purview accounts
+> - ✅ Better tooling and automation
+>
+> Legacy files have been moved to the `legacy/` folder for reference.
+
+---
+
+## Legacy Deployment Documentation
+
+The original bash script deployment (`deploy_sa.sh`) and ARM templates are preserved in the `legacy/` folder.
+
+For the new recommended deployment approach, see the [main README](../../README.md).
+
+### Quick Start with New Deployment
+
+1. Install [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd)
+2. Run the interactive setup script:
+   ```powershell
+   # Windows
+   .\scripts\setup.ps1
+   
+   # Mac/Linux  
+   ./scripts/setup.sh
+   ```
+
+---
+
+## Original Documentation (Legacy)
+
+**Note**: The following documentation describes the legacy deployment process. It is kept for reference only.
 
 ## Services Installed
   

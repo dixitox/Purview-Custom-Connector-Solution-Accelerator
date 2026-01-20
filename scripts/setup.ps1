@@ -64,14 +64,20 @@ Write-Host ""
 
 # Check for existing Purview accounts
 Write-Color "Step 2: Check for existing Purview accounts" Cyan
-$purviewAccounts = az purview account list --query "[].name" -o tsv 2>$null
+
+# Suppress warnings and errors, get only the valid output
+$ErrorActionPreference = 'SilentlyContinue'
+$purviewAccountsRaw = az purview account list --query "[].name" -o tsv 2>&1 | Where-Object { $_ -notmatch '^WARNING:' -and $_ -notmatch '^ERROR:' }
+$ErrorActionPreference = 'Continue'
+
+$purviewAccounts = $purviewAccountsRaw -join "`n"
 
 if ([string]::IsNullOrWhiteSpace($purviewAccounts)) {
     Write-Color "No existing Purview accounts found." Yellow
     $PURVIEW_ACCOUNT_NAME = ""
 } else {
     Write-Color "Found existing Purview account(s):" Green
-    $purviewAccounts -split "`n" | ForEach-Object { $i = 1 } { Write-Host "$i. $_"; $i++ }
+    $purviewAccounts -split "`n" | Where-Object { $_ -and $_.Trim() } | ForEach-Object { $i = 1 } { Write-Host "$i. $_"; $i++ }
     Write-Host ""
     Write-Color "Note: You can only have ONE Purview account per Azure tenant." Yellow
     $PURVIEW_ACCOUNT_NAME = Read-Host "Enter Purview account name to reuse (or press Enter to create new)"

@@ -26,9 +26,18 @@ echo -e "${GREEN}Current Subscription:${NC} $SUBSCRIPTION_NAME ($SUBSCRIPTION_ID
 
 # Search for existing Purview accounts
 echo -e "\n${YELLOW}Searching for Purview accounts in subscription...${NC}"
-PURVIEW_ACCOUNTS=$(az purview account list --query "[].{Name:name, ResourceGroup:resourceGroup, Location:location}" -o json)
 
-ACCOUNT_COUNT=$(echo "$PURVIEW_ACCOUNTS" | jq '. | length')
+# Suppress warnings, get only JSON output
+PURVIEW_ACCOUNTS=$(az purview account list --query "[].{Name:name, ResourceGroup:resourceGroup, Location:location}" -o json 2>&1 | grep -v '^WARNING:' | grep -v '^ERROR:')
+
+# Check if we got valid JSON
+if ! echo "$PURVIEW_ACCOUNTS" | jq empty 2>/dev/null; then
+    echo -e "${YELLOW}Unable to query Purview accounts. The Purview CLI extension may not be installed.${NC}"
+    echo -e "${GREEN}You can create a new Purview account during deployment.${NC}"
+    exit 0
+fi
+
+ACCOUNT_COUNT=$(echo "$PURVIEW_ACCOUNTS" | jq '. | length' 2>/dev/null || echo "0")
 
 if [ "$ACCOUNT_COUNT" -eq 0 ]; then
     echo -e "${YELLOW}No existing Purview accounts found.${NC}"
