@@ -11,6 +11,15 @@ products:
 
 # Purview Custom Connector Solution Accelerator
 
+## 📋 Table of Contents
+- [Quick Start](#-quick-start---3-easy-steps) - Deploy in 15 minutes
+- [Step-by-Step Deployment](#deployment---step-by-step) - Detailed instructions
+- [Examples](#next-steps) - SSIS and Tag Database examples
+- [Troubleshooting](#troubleshooting) - Common issues and solutions
+- [Advanced Configuration](./docs/DEPLOYMENT_AZD.md) - Advanced deployment options
+
+---
+
 Microsoft Purview is a unified data governance service that helps you manage and govern your on-premises, multi-cloud, and software-as-a-service (SaaS) data. Microsoft Purview Data Map provides the foundation for data discovery and effective data governance, however, no solution can support scanning metadata for all existing data sources or lineage for every ETL tool or process that exists today. That is why Purview was built for extensibility using the open Apache Atlas API set. This API set allows customers to develop their own scanning capabilities for data sources or ETL tools which are not yet supported out of the box. This Solution Accelerator is designed to jump start the development process and provide patterns and reusable tooling to help accelerate the creation of Custom Connectors for Microsoft Purview.
 
 The accelerator includes documentation, resources and examples to inform about the custom connector development process, tools, and APIs. It further works with utilities to make it easier to create a meta-model for your connector (Purview Custom Types Tool) with examples including ETL tool lineage as well as a custom data source. It includes infrastructure / architecture to support scanning of on-prem and complex data sources using Microsoft Fabric Spark for compute and Fabric Data Pipelines for orchestration.
@@ -21,17 +30,57 @@ There are multiple ways to integrate with Purview.  Apache Atlas integration (as
 
 The examples provided demonstrate how the design and services can be used to accelerate the creation of custom connectors, but are not designed to be generic production SSIS or Tag Database connectors. Work will be required to support specific customer use cases.
 
+## 🚀 Quick Start - 3 Easy Steps
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  Step 1: Install Tools (5 min)                                  │
+│  ├─ Azure CLI: az.ms/install-cli                               │
+│  └─ Azure Developer CLI: aka.ms/install-azd                     │
+├─────────────────────────────────────────────────────────────────┤
+│  Step 2: Create Service Principal (2 min)                       │
+│  └─ az ad sp create-for-rbac --name "PurviewCustomConnectorSP"  │
+├─────────────────────────────────────────────────────────────────┤
+│  Step 3: Run Setup Script (auto-deploy)                         │
+│  Windows:  .\scripts\setup.ps1                                  │
+│  Mac/Linux: ./scripts/setup.sh                                  │
+└─────────────────────────────────────────────────────────────────┘
+         ↓
+    DEPLOYED ✓
+```
+
+**Total Time**: ~15 minutes (most is Azure provisioning)
+
 ## Prerequisites
 
-- This solution accelerator is designed to be combined with the [Purview Custom Types Tool SA](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator). Installation of this accelerator is required to run the examples in this accelerator.
 - Azure Subscription with Contributor and User Access Administrator permissions
 - [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) installed locally
-- Microsoft Fabric capacity or trial license
-- Visual Studio Code (recommended for local development)
+- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) installed locally
+- Microsoft Fabric capacity or trial license (for Fabric workspace configuration)
+- [Purview Custom Types Tool SA](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator) - Required for running examples
 
-## Quick Start
+## Deployment - Step by Step
 
-### 1. Create Service Principal (5 minutes)
+### Step 1: Install Prerequisites (5 minutes)
+
+Install Azure Developer CLI (azd):
+
+**Windows:**
+```powershell
+winget install microsoft.azd
+```
+
+**macOS:**
+```bash
+brew tap azure/azd && brew install azd
+```
+
+**Linux:**
+```bash
+curl -fsSL https://aka.ms/install-azd.sh | bash
+```
+
+### Step 2: Create Service Principal (2 minutes)
 
 ```bash
 # Login to Azure
@@ -40,93 +89,242 @@ az login
 # Create service principal
 az ad sp create-for-rbac --name "PurviewCustomConnectorSP" --role Contributor
 
-# Save the output values:
-# - appId (CLIENT_ID)
-# - password (CLIENT_SECRET)  
-# - tenant (TENANT_ID)
+# SAVE THIS OUTPUT - You'll need:
+# - appId (your client ID)
+# - password (your client secret)
+# - tenant (your tenant ID)
 ```
 
-### 2. Configure Settings (2 minutes)
+### Step 3: Check for Existing Purview Account (1 minute)
 
-1. Navigate to `purview_connector_services/deploy/`
-2. Copy `settings.sh.rename` to `settings.sh`
-3. Edit with your values:
+⚠️ **IMPORTANT**: You can only have **ONE Purview account per Azure tenant**.
+
+**Windows:**
+```powershell
+.\scripts\check-purview-accounts.ps1
+```
+
+**macOS/Linux:**
+```bash
+./scripts/check-purview-accounts.sh
+```
+
+**If you have an existing Purview account, note its name - you'll reuse it in Step 5.**
+
+### Step 4: Run Interactive Setup (3 minutes)
+
+**Windows:**
+```powershell
+.\scripts\setup.ps1
+```
+
+**macOS/Linux:**
+```bash
+./scripts/setup.sh
+```
+
+The setup script will ask you for:
+- Environment name (e.g., `dev`)
+- Service principal credentials (from Step 2)
+- Whether to reuse existing Purview account (from Step 3)
+- Resource group name (default: `pccsa-rg`)
+- Azure region (default: `eastus`)
+
+Then it will deploy everything automatically!
+
+### Step 5: Manual Configuration (If You Skipped Interactive Setup)
+
+If you prefer manual configuration:
 
 ```bash
-#!/bin/bash
-location="eastus"  # Choose your Azure region
-client_name="PurviewCustomConnectorSP"
-client_id="<YOUR_APP_ID>"
-client_secret="<YOUR_CLIENT_SECRET>"
+# Initialize environment
+azd init
+
+# Set required variables
+azd env set AZURE_CLIENT_ID "<your-appId-from-step-2>"
+azd env set AZURE_CLIENT_SECRET "<your-password-from-step-2>"
+
+# Optional: Use existing Purview account (recommended if you have one)
+azd env set PURVIEW_ACCOUNT_NAME "<your-existing-purview-account>"
+
+# Optional: Custom resource group name
+azd env set AZURE_RESOURCE_GROUP "my-custom-rg"
+
+# Optional: Choose Azure region
+azd env set AZURE_LOCATION "eastus"
+
+# Deploy
+azd up
 ```
 
-### 3. Deploy Azure Resources (45 minutes)
+### Step 6: Verify Deployment (2 minutes)
 
 ```bash
-# From VS Code terminal or local bash shell
-cd purview_connector_services/deploy
+# View deployed resources
+azd env get-values
 
-# Make script executable (Linux/Mac)
-chmod +x deploy_sa.sh
-
-# Run deployment
-./deploy_sa.sh
-
-# After completion, save the resource names
-cat export_names.sh
+# Or check in Azure Portal
+az resource list --resource-group <your-resource-group> --output table
 ```
 
-**What gets deployed:**
-- Microsoft Purview Account
-- Azure Storage Account (ADLS Gen2)
-- Azure Key Vault
-- Folder structure in storage
+**What was deployed:**
+✅ Resource Group (your custom name or default)  
+✅ Purview Account (reused existing or created new)  
+✅ Storage Account with ADLS Gen2  
+✅ Key Vault (with service principal secret)  
+✅ Storage folders (`/incoming`, `/processed`)  
+✅ Role assignments (Purview Data Curator & Reader)
 
-### 4. Create Fabric Workspace (15 minutes)
+### Step 7: Configure Microsoft Fabric Workspace (15 minutes)
+
+**Manual steps required** (Fabric workspace cannot be automated):
 
 1. Go to [Microsoft Fabric Portal](https://app.fabric.microsoft.com)
 2. Create new workspace with Fabric capacity or trial
-3. Create a Lakehouse in the workspace
-4. Add ADLS shortcut to your storage account (path: `/pccsa`)
-5. Create Spark Environment with `pyapacheatlas` package
+3. Import notebooks from `purview_connector_services/Fabric/notebook/`
+4. Import pipelines from `purview_connector_services/Fabric/pipeline/`
+5. Create connections to your Storage Account and Purview Account
 
-### 5. Configure Purview (10 minutes)
+### Step 8: Configure Purview Root Collection (5 minutes)
 
 1. Go to [Purview Studio](https://web.purview.azure.com)
-2. Navigate to your Purview account → Data Map → Collections → Root collection
-3. Add your service principal to **Data Curators** and **Data Readers** roles
-4. Install [Purview Custom Types Tool](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator)
-5. Create entity type: `purview_custom_connector_generic_entity` (DataSet supertype)
+2. Select your Purview account
+3. Navigate to **Data Map** → **Collections** → **Root collection**
+4. Click **Role assignments**
+5. Add your service principal to:
+   - **Data Curators** role
+   - **Data Readers** role
 
-### 6. Import Notebooks and Pipelines (20 minutes)
+### Step 9: Install Purview Custom Types Tool (10 minutes)
 
-**Import Notebooks:**
-1. In Fabric workspace, import notebooks from `purview_connector_services/Fabric/notebook/`
-2. Attach to your Spark environment and Lakehouse
+Install the companion tool to create custom entity types:
 
-**Create Pipeline:**
-1. Create new Data Pipeline: `Purview Load Custom Types`
-2. Add Web activity to get secret from Key Vault
-3. Add Notebook activity to run `Purview_Load_Entity` with parameters
-4. Configure pipeline with values from `export_names.sh`
+1. Visit [Purview Custom Types Tool](https://github.com/microsoft/Purview-Custom-Types-Tool-Solution-Accelerator)
+2. Follow installation instructions
+3. Create base entity type: `purview_custom_connector_generic_entity` (DataSet supertype)
 
-### 7. Test (5 minutes)
+---
 
-Upload test JSON to `<storage>/pccsa/pccsa_main/incoming/`:
+## ✅ You're Done!
 
-```json
-{
-  "typeName": "purview_custom_connector_generic_entity",
-  "attributes": {
-    "qualifiedName": "test://my-entity",
-    "name": "Test Entity"
-  }
-}
+Your deployment is complete. You now have:
+- ✅ Azure infrastructure deployed (Purview, Storage, Key Vault)
+- ✅ Microsoft Fabric workspace configured
+- ✅ Purview permissions configured
+- ✅ Ready to run examples (SSIS, Tag Database)
+
+## Next Steps
+
+### Run the Examples
+
+This accelerator includes two working examples:
+
+**1. SSIS Package Lineage Example**
+- Location: `examples/ssis/`
+- Shows how to capture SSIS package execution lineage
+- See [examples/ssis/ssis.md](examples/ssis/ssis.md)
+
+**2. Tag Database Example**
+- Location: `examples/tag_db/`
+- Shows how to scan custom metadata from XML files
+- See [examples/tag_db/tag_db.md](examples/tag_db/tag_db.md)
+
+### Updating Your Deployment
+
+To update infrastructure after changes:
+
+```bash
+azd provision  # Update infrastructure only
+# or
+azd up        # Full update
 ```
 
-Run pipeline and verify entity in Purview Data Catalog.
+### Managing Multiple Environments
 
-**Total time:** ~2 hours
+```bash
+# Create new environments
+azd env new test
+azd env new prod
+
+# Switch between them
+azd env select dev
+azd env select test
+```
+
+### Cleaning Up
+
+To delete all resources:
+
+```bash
+azd down  # Deletes everything in the resource group
+```
+
+---
+
+## Troubleshooting
+
+### "Purview account already exists"
+You can only have ONE Purview account per tenant. Reuse it:
+```bash
+azd env set PURVIEW_ACCOUNT_NAME "<existing-account-name>"
+azd up
+```
+
+### "Service principal not found"
+Verify it exists:
+```bash
+az ad sp list --display-name "PurviewCustomConnectorSP"
+```
+
+### "Insufficient permissions"
+Ensure you have:
+- Contributor role on subscription
+- User Access Administrator role (for role assignments)
+
+### Deployment fails
+Check logs:
+```bash
+azd monitor
+# or
+az deployment group show --resource-group <your-rg> --name core-resources-deployment
+```
+
+---
+
+## Additional Information
+
+### What Gets Deployed?
+
+| Resource | Purpose |
+|----------|---------|
+| **Resource Group** | Container for all resources |
+| **Purview Account** | Data governance and catalog |
+| **Storage Account (ADLS Gen2)** | Store incoming metadata files |
+| **Key Vault** | Securely store service principal secret |
+| **Role Assignments** | Grant service principal access to Purview |
+
+### Configuration Options
+
+All configurable via environment variables:
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `AZURE_CLIENT_ID` | ✅ Yes | - | Service principal ID |
+| `AZURE_CLIENT_SECRET` | ✅ Yes | - | Service principal password |
+| `AZURE_RESOURCE_GROUP` | No | pccsa-rg | Resource group name |
+| `AZURE_LOCATION` | No | eastus | Azure region |
+| `PURVIEW_ACCOUNT_NAME` | No | (auto) | Existing Purview account |
+| `BASE_NAME` | No | pccsa | Base name (max 7 chars) |
+
+### Useful Commands
+
+```bash
+azd up              # Deploy everything
+azd provision       # Update infrastructure only
+azd env get-values  # View configuration
+azd env select      # Switch environments
+azd down            # Delete all resources
+```
 
 ---
 
